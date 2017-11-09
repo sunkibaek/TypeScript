@@ -400,7 +400,7 @@ namespace ts {
         program: Program | undefined,
         rootFileNames: string[],
         newOptions: CompilerOptions,
-        getSourceVersion: (path: Path) => string,
+        getSourceVersion: (path: Path) => string | undefined,
         fileExists: (fileName: string) => boolean,
         hasInvalidatedResolution: HasInvalidatedResolution,
         hasChangedAutomaticTypeDirectiveNames: boolean,

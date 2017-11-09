@@ -58,9 +58,9 @@ namespace ts {
 
         // Copies keys/values from template. Note that for..in will not throw if
         // template is undefined, and instead will just exit the loop.
-        for (const key in template) {
+        for (const key in template!) {
             if (hasOwnProperty.call(template, key)) {
-                map.set(key, template[key]);
+                map.set(key, template![key]);
             }
         }
 
@@ -101,7 +101,7 @@ namespace ts {
             private data = createDictionaryObject<T>();
             public size = 0;
 
-            get(key: string): T {
+            get(key: string): T | undefined {
                 return this.data[key];
             }
 
@@ -132,15 +132,15 @@ namespace ts {
                 this.size = 0;
             }
 
-            keys() {
+            keys(): Iterator<string> {
                 return new MapIterator(this.data, (_data, key) => key);
             }
 
-            values() {
+            values(): Iterator<T> {
                 return new MapIterator(this.data, (data, key) => data[key]);
             }
 
-            entries() {
+            entries(): Iterator<[string, T]> {
                 return new MapIterator(this.data, (data, key) => [key, data[key]] as [string, T]);
             }
 
@@ -159,7 +159,7 @@ namespace ts {
         return <Path>getCanonicalFileName(nonCanonicalizedPath);
     }
 
-    export function length(array: ReadonlyArray<any>) {
+    export function length(array: ReadonlyArray<any> | undefined): number {
         return array ? array.length : 0;
     }
 
@@ -181,7 +181,7 @@ namespace ts {
     }
 
     /** Like `forEach`, but suitable for use with numbers and strings (which may be falsy). */
-    export function firstDefined<T, U>(array: ReadonlyArray<T> | undefined, callback: (element: T, index: number) => U | undefined): U | undefined {
+    export function firstDefined<T, U>(array: ReadonlyArray<T>, callback: (element: T, index: number) => U | undefined): U | undefined {
         for (let i = 0; i < array.length; i++) {
             const result = callback(array[i], i);
             if (result !== undefined) {
@@ -199,7 +199,7 @@ namespace ts {
      */
     export function findAncestor<T extends Node>(node: Node, callback: (element: Node) => element is T): T | undefined;
     export function findAncestor(node: Node, callback: (element: Node) => boolean | "quit"): Node | undefined;
-    export function findAncestor(node: Node, callback: (element: Node) => boolean | "quit"): Node {
+    export function findAncestor(node: Node, callback: (element: Node) => boolean | "quit"): Node | undefined {
         while (node) {
             const result = callback(node);
             if (result === "quit") {
@@ -208,7 +208,7 @@ namespace ts {
             else if (result) {
                 return node;
             }
-            node = node.parent;
+            node = node.parent!;
         }
         return undefined;
     }
@@ -347,7 +347,11 @@ namespace ts {
     export function filter<T>(array: T[], f: (x: T) => boolean): T[];
     export function filter<T, U extends T>(array: ReadonlyArray<T>, f: (x: T) => x is U): ReadonlyArray<U>;
     export function filter<T, U extends T>(array: ReadonlyArray<T>, f: (x: T) => boolean): ReadonlyArray<T>;
-    export function filter<T>(array: T[], f: (x: T) => boolean): T[] {
+    export function filter<T, U extends T>(array: T[] | undefined, f: (x: T) => x is U): U[] | undefined;
+    export function filter<T>(array: T[] | undefined, f: (x: T) => boolean): T[] | undefined;
+    export function filter<T, U extends T>(array: ReadonlyArray<T> | undefined, f: (x: T) => x is U): ReadonlyArray<U> | undefined;
+    export function filter<T, U extends T>(array: ReadonlyArray<T> | undefined, f: (x: T) => boolean): ReadonlyArray<T> | undefined;
+    export function filter<T>(array: ReadonlyArray<T> | undefined, f: (x: T) => boolean): ReadonlyArray<T> | undefined {
         if (array) {
             const len = array.length;
             let i = 0;
@@ -383,8 +387,10 @@ namespace ts {
         array.length = 0;
     }
 
-    export function map<T, U>(array: ReadonlyArray<T>, f: (x: T, i: number) => U): U[] {
-        let result: U[];
+    export function map<T, U>(array: ReadonlyArray<T>, f: (x: T, i: number) => U): U[];
+    export function map<T, U>(array: ReadonlyArray<T> | undefined, f: (x: T, i: number) => U): U[] | undefined;
+    export function map<T, U>(array: ReadonlyArray<T> | undefined, f: (x: T, i: number) => U): U[] | undefined {
+        let result: U[] | undefined;
         if (array) {
             result = [];
             for (let i = 0; i < array.length; i++) {
@@ -395,10 +401,10 @@ namespace ts {
     }
 
     // Maps from T to T and avoids allocation if all elements map to themselves
-    export function sameMap<T>(array: T[], f: (x: T, i: number) => T): T[];
-    export function sameMap<T>(array: ReadonlyArray<T>, f: (x: T, i: number) => T): ReadonlyArray<T>;
-    export function sameMap<T>(array: T[], f: (x: T, i: number) => T): T[] {
-        let result: T[];
+    export function sameMap<T>(array: T[] | undefined, f: (x: T, i: number) => T): T[] | undefined;
+    export function sameMap<T>(array: ReadonlyArray<T> | undefined, f: (x: T, i: number) => T): ReadonlyArray<T> | undefined;
+    export function sameMap<T>(array: T[] | undefined, f: (x: T, i: number) => T): T[] | undefined {
+        let result: T[] | undefined;
         if (array) {
             for (let i = 0; i < array.length; i++) {
                 if (result) {
@@ -422,8 +428,10 @@ namespace ts {
      *
      * @param array The array to flatten.
      */
-    export function flatten<T>(array: ReadonlyArray<T | ReadonlyArray<T>>): T[] {
-        let result: T[];
+    export function flatten<T>(array: ReadonlyArray<T | ReadonlyArray<T>>): T[];
+    export function flatten<T>(array: ReadonlyArray<T | ReadonlyArray<T>> | undefined): T[] | undefined;
+    export function flatten<T>(array: ReadonlyArray<T | ReadonlyArray<T>> | undefined): T[] | undefined {
+        let result: T[] | undefined;
         if (array) {
             result = [];
             for (const v of array) {
@@ -447,8 +455,10 @@ namespace ts {
      * @param array The array to map.
      * @param mapfn The callback used to map the result into one or more values.
      */
+    export function flatMap<T, U>(array: ReadonlyArray<T>, mapfn: (x: T, i: number) => U | ReadonlyArray<U> | undefined): U[];
+    export function flatMap<T, U>(array: ReadonlyArray<T> | undefined, mapfn: (x: T, i: number) => U | ReadonlyArray<U> | undefined): U[] | undefined;
     export function flatMap<T, U>(array: ReadonlyArray<T> | undefined, mapfn: (x: T, i: number) => U | ReadonlyArray<U> | undefined): U[] | undefined {
-        let result: U[];
+        let result: U[] | undefined;
         if (array) {
             result = [];
             for (let i = 0; i < array.length; i++) {
@@ -494,7 +504,7 @@ namespace ts {
     export function sameFlatMap<T>(array: T[], mapfn: (x: T, i: number) => T | ReadonlyArray<T>): T[];
     export function sameFlatMap<T>(array: ReadonlyArray<T>, mapfn: (x: T, i: number) => T | ReadonlyArray<T>): ReadonlyArray<T>;
     export function sameFlatMap<T>(array: T[], mapfn: (x: T, i: number) => T | T[]): T[] {
-        let result: T[];
+        let result: T[] | undefined;
         if (array) {
             for (let i = 0; i < array.length; i++) {
                 const item = array[i];
@@ -546,7 +556,9 @@ namespace ts {
      * Computes the first matching span of elements and returns a tuple of the first span
      * and the remaining elements.
      */
-    export function span<T>(array: ReadonlyArray<T>, f: (x: T, i: number) => boolean): [T[], T[]] {
+    export function span<T>(array: ReadonlyArray<T>, f: (x: T, i: number) => boolean): [T[], T[]];
+    export function span<T>(array: ReadonlyArray<T> | undefined, f: (x: T, i: number) => boolean): [T[], T[]] | undefined;
+    export function span<T>(array: ReadonlyArray<T> | undefined, f: (x: T, i: number) => boolean): [T[], T[]] | undefined {
         if (array) {
             for (let i = 0; i < array.length; i++) {
                 if (!f(array[i], i)) {
@@ -566,13 +578,13 @@ namespace ts {
      * @param keyfn A callback used to select the key for an element.
      * @param mapfn A callback used to map a contiguous chunk of values to a single value.
      */
-    export function spanMap<T, K, U>(array: ReadonlyArray<T>, keyfn: (x: T, i: number) => K, mapfn: (chunk: T[], key: K, start: number, end: number) => U): U[] {
-        let result: U[];
+    export function spanMap<T, K, U>(array: ReadonlyArray<T> | undefined, keyfn: (x: T, i: number) => K, mapfn: (chunk: T[], key: K, start: number, end: number) => U): U[] | undefined {
+        let result: U[] | undefined;
         if (array) {
             result = [];
             const len = array.length;
-            let previousKey: K;
-            let key: K;
+            let previousKey: K | undefined;
+            let key: K | undefined;
             let start = 0;
             let pos = 0;
             while (start < len) {
@@ -590,7 +602,7 @@ namespace ts {
                 }
 
                 if (start < pos) {
-                    const v = mapfn(array.slice(start, pos), previousKey, start, pos);
+                    const v = mapfn(array.slice(start, pos), previousKey!, start, pos);
                     if (v) {
                         result.push(v);
                     }
@@ -606,7 +618,9 @@ namespace ts {
         return result;
     }
 
-    export function mapEntries<T, U>(map: ReadonlyMap<T>, f: (key: string, value: T) => [string, U]): Map<U> {
+    export function mapEntries<T, U>(map: ReadonlyMap<T>, f: (key: string, value: T) => [string, U]): Map<U>;
+    export function mapEntries<T, U>(map: ReadonlyMap<T> | undefined, f: (key: string, value: T) => [string, U]): Map<U> | undefined;
+    export function mapEntries<T, U>(map: ReadonlyMap<T> | undefined, f: (key: string, value: T) => [string, U]): Map<U> | undefined {
         if (!map) {
             return undefined;
         }
@@ -619,7 +633,7 @@ namespace ts {
         return result;
     }
 
-    export function some<T>(array: ReadonlyArray<T>, predicate?: (value: T) => boolean): boolean {
+    export function some<T>(array: ReadonlyArray<T> | undefined, predicate?: (value: T) => boolean): boolean {
         if (array) {
             if (predicate) {
                 for (const v of array) {
@@ -637,9 +651,11 @@ namespace ts {
 
     export function concatenate<T>(array1: T[], array2: T[]): T[];
     export function concatenate<T>(array1: ReadonlyArray<T>, array2: ReadonlyArray<T>): ReadonlyArray<T>;
-    export function concatenate<T>(array1: T[], array2: T[]): T[] {
-        if (!some(array2)) return array1;
-        if (!some(array1)) return array2;
+    export function concatenate<T>(array1: T[] | undefined, array2: T[] | undefined): T[] | undefined;
+    export function concatenate<T>(array1: ReadonlyArray<T> | undefined, array2: ReadonlyArray<T> | undefined): ReadonlyArray<T> | undefined;
+    export function concatenate<T>(array1: ReadonlyArray<T> | undefined, array2: ReadonlyArray<T> | undefined): ReadonlyArray<T> | undefined {
+        if (!array2 || !array2.length) return array1;
+        if (!array1 || !array1.length) return array2;
         return [...array1, ...array2];
     }
 
@@ -679,7 +695,9 @@ namespace ts {
      * @param comparer An optional `Comparer` used to sort entries before comparison, though the
      * result will remain in the original order in `array`.
      */
-    export function deduplicate<T>(array: ReadonlyArray<T>, equalityComparer: EqualityComparer<T>, comparer?: Comparer<T>): T[] {
+    export function deduplicate<T>(array: ReadonlyArray<T>, equalityComparer: EqualityComparer<T>, comparer?: Comparer<T>): T[];
+    export function deduplicate<T>(array: ReadonlyArray<T> | undefined, equalityComparer: EqualityComparer<T>, comparer?: Comparer<T>): T[] | undefined;
+    export function deduplicate<T>(array: ReadonlyArray<T> | undefined, equalityComparer: EqualityComparer<T>, comparer?: Comparer<T>): T[] | undefined {
         return !array ? undefined :
             array.length === 0 ? [] :
             array.length === 1 ? array.slice() :
@@ -690,7 +708,9 @@ namespace ts {
     /**
      * Deduplicates an array that has already been sorted.
      */
-    function deduplicateSorted<T>(array: ReadonlyArray<T>, comparer: EqualityComparer<T> | Comparer<T>) {
+    function deduplicateSorted<T>(array: ReadonlyArray<T>, comparer: EqualityComparer<T> | Comparer<T>): T[];
+    function deduplicateSorted<T>(array: ReadonlyArray<T> | undefined, comparer: EqualityComparer<T> | Comparer<T>): T[] | undefined;
+    function deduplicateSorted<T>(array: ReadonlyArray<T> | undefined, comparer: EqualityComparer<T> | Comparer<T>): T[] | undefined {
         if (!array) return undefined;
         if (array.length === 0) return [];
 
@@ -717,11 +737,11 @@ namespace ts {
         return deduplicated;
     }
 
-    export function sortAndDeduplicate<T>(array: ReadonlyArray<T>, comparer: Comparer<T>, equalityComparer?: EqualityComparer<T>) {
+    export function sortAndDeduplicate<T>(array: ReadonlyArray<T>, comparer: Comparer<T>, equalityComparer?: EqualityComparer<T>): T[] {
         return deduplicateSorted(sort(array, comparer), equalityComparer || comparer);
     }
 
-    export function arrayIsEqualTo<T>(array1: ReadonlyArray<T>, array2: ReadonlyArray<T>, equalityComparer: (a: T, b: T) => boolean = equateValues): boolean {
+    export function arrayIsEqualTo<T>(array1: ReadonlyArray<T> | undefined, array2: ReadonlyArray<T> | undefined, equalityComparer: (a: T, b: T) => boolean = equateValues): boolean {
         if (!array1 || !array2) {
             return array1 === array2;
         }
@@ -913,7 +933,7 @@ namespace ts {
     /**
      * Returns a new sorted array.
      */
-    export function sort<T>(array: ReadonlyArray<T>, comparer: Comparer<T>) {
+    export function sort<T>(array: ReadonlyArray<T>, comparer: Comparer<T>): T[] {
         return array.slice().sort(comparer);
     }
 
@@ -977,7 +997,7 @@ namespace ts {
     /**
      * Returns the only element of an array if it contains only one element, `undefined` otherwise.
      */
-    export function singleOrUndefined<T>(array: ReadonlyArray<T>): T | undefined {
+    export function singleOrUndefined<T>(array: ReadonlyArray<T> | undefined): T | undefined {
         return array && array.length === 1
             ? array[0]
             : undefined;
@@ -1183,7 +1203,7 @@ namespace ts {
      * @param left A map-like whose properties should be compared.
      * @param right A map-like whose properties should be compared.
      */
-    export function equalOwnProperties<T>(left: MapLike<T>, right: MapLike<T>, equalityComparer: EqualityComparer<T> = equateValues) {
+    export function equalOwnProperties<T>(left: MapLike<T> | undefined, right: MapLike<T> | undefined, equalityComparer: EqualityComparer<T> = equateValues) {
         if (left === right) return true;
         if (!left || !right) return false;
         for (const key in left) {
@@ -1362,7 +1382,7 @@ namespace ts {
         return () => {
             if (callback) {
                 value = callback();
-                callback = undefined;
+                callback = undefined!;
             }
             return value;
         };
@@ -1434,13 +1454,11 @@ namespace ts {
         }
     }
 
-    export function formatStringFromArgs(text: string, args: { [index: number]: string; }, baseIndex?: number): string {
-        baseIndex = baseIndex || 0;
-
+    export function formatStringFromArgs(text: string, args: { [index: number]: string; }, baseIndex = 0): string {
         return text.replace(/{(\d+)}/g, (_match, index?) => args[+index + baseIndex]);
     }
 
-    export let localizedDiagnosticMessages: MapLike<string> = undefined;
+    export let localizedDiagnosticMessages: MapLike<string> | undefined;
 
     export function getLocaleSpecificMessage(message: DiagnosticMessage) {
         return localizedDiagnosticMessages && localizedDiagnosticMessages[message.key] || message.message;
@@ -1571,9 +1589,9 @@ namespace ts {
         return equateValues(a, b);
     }
 
-    function compareComparableValues(a: string, b: string): Comparison;
-    function compareComparableValues(a: number, b: number): Comparison;
-    function compareComparableValues(a: string | number, b: string | number) {
+    function compareComparableValues(a: string | undefined, b: string | undefined): Comparison;
+    function compareComparableValues(a: number | undefined, b: number | undefined): Comparison;
+    function compareComparableValues(a: string | number | undefined, b: string | number | undefined) {
         return a === b ? Comparison.EqualTo :
             a === undefined ? Comparison.LessThan :
             b === undefined ? Comparison.GreaterThan :
@@ -1585,7 +1603,7 @@ namespace ts {
      * Compare two numeric values for their order relative to each other.
      * To compare strings, use any of the `compareStrings` functions.
      */
-    export function compareValues(a: number, b: number) {
+    export function compareValues(a: number | undefined, b: number | undefined): Comparison {
         return compareComparableValues(a, b);
     }
 
@@ -1620,7 +1638,7 @@ namespace ts {
      * Case-sensitive comparisons compare both strings one code-point at a time using the integer
      * value of each code-point.
      */
-    export function compareStringsCaseSensitive(a: string, b: string) {
+    export function compareStringsCaseSensitive(a: string | undefined, b: string | undefined): Comparison {
         return compareComparableValues(a, b);
     }
 
@@ -1748,7 +1766,7 @@ namespace ts {
             comparer(a[key], b[key]);
     }
 
-    function getDiagnosticFileName(diagnostic: Diagnostic): string {
+    function getDiagnosticFileName(diagnostic: Diagnostic): string | undefined {
         return diagnostic.file ? diagnostic.file.fileName : undefined;
     }
 
@@ -1761,7 +1779,9 @@ namespace ts {
             Comparison.EqualTo;
     }
 
-    function compareMessageText(text1: string | DiagnosticMessageChain, text2: string | DiagnosticMessageChain): Comparison {
+    function compareMessageText(text1_: string | DiagnosticMessageChain, text2_: string | DiagnosticMessageChain): Comparison {
+        let text1: string | DiagnosticMessageChain | undefined = text1_;
+        let text2: string | DiagnosticMessageChain | undefined = text2_;
         while (text1 && text2) {
             // We still have both chains.
             const string1 = isString(text1) ? text1 : text1.messageText;
@@ -1926,7 +1946,7 @@ namespace ts {
     export type StrictOptionName = "noImplicitAny" | "noImplicitThis" | "strictNullChecks" | "strictFunctionTypes" | "alwaysStrict";
 
     export function getStrictOptionValue(compilerOptions: CompilerOptions, flag: StrictOptionName): boolean {
-        return compilerOptions[flag] === undefined ? compilerOptions.strict : compilerOptions[flag];
+        return compilerOptions[flag] === undefined ? !!compilerOptions.strict : !!compilerOptions[flag];
     }
 
     export function hasZeroOrOneAsteriskCharacter(str: string): boolean {
@@ -1945,8 +1965,8 @@ namespace ts {
         return true;
     }
 
-    export function isRootedDiskPath(path: string) {
-        return path && getRootLength(path) !== 0;
+    export function isRootedDiskPath(path: string): boolean {
+        return path !== undefined && getRootLength(path) !== 0;
     }
 
     export function convertToRelativePath(absoluteOrRelativePath: string, basePath: string, getCanonicalFileName: (path: string) => string): string {
@@ -1972,11 +1992,11 @@ namespace ts {
         return normalizedPathComponents(path, rootLength);
     }
 
-    export function getNormalizedAbsolutePath(fileName: string, currentDirectory: string) {
-        return getNormalizedPathFromPathComponents(getNormalizedPathComponents(fileName, currentDirectory));
+    export function getNormalizedAbsolutePath(fileName: string, currentDirectory: string): string {
+        return getNormalizedPathFromPathComponents(getNormalizedPathComponents(fileName, currentDirectory))!;
     }
 
-    export function getNormalizedPathFromPathComponents(pathComponents: ReadonlyArray<string>) {
+    export function getNormalizedPathFromPathComponents(pathComponents: ReadonlyArray<string>): string | undefined {
         if (pathComponents && pathComponents.length) {
             return pathComponents[0] + pathComponents.slice(1).join(directorySeparator);
         }
@@ -2033,7 +2053,7 @@ namespace ts {
         }
     }
 
-    export function getRelativePathToDirectoryOrUrl(directoryPathOrUrl: string, relativeOrAbsolutePath: string, currentDirectory: string, getCanonicalFileName: (fileName: string) => string, isAbsolutePathAnUrl: boolean) {
+    export function getRelativePathToDirectoryOrUrl(directoryPathOrUrl: string, relativeOrAbsolutePath: string, currentDirectory: string, getCanonicalFileName: (fileName: string) => string, isAbsolutePathAnUrl: boolean): string {
         const pathComponents = getNormalizedPathOrUrlComponents(relativeOrAbsolutePath, currentDirectory);
         const directoryComponents = getNormalizedPathOrUrlComponents(directoryPathOrUrl, currentDirectory);
         if (directoryComponents.length > 1 && lastOrUndefined(directoryComponents) === "") {
@@ -2064,7 +2084,7 @@ namespace ts {
         }
 
         // Cant find the relative path, get the absolute path
-        let absolutePath = getNormalizedPathFromPathComponents(pathComponents);
+        let absolutePath = getNormalizedPathFromPathComponents(pathComponents)!;
         if (isAbsolutePathAnUrl && isRootedDiskPath(absolutePath)) {
             absolutePath = "file:///" + absolutePath;
         }
@@ -2072,6 +2092,8 @@ namespace ts {
         return absolutePath;
     }
 
+    export function getBaseFileName(path: string): string;
+    export function getBaseFileName(path: string | undefined): string | undefined;
     export function getBaseFileName(path: string) {
         if (path === undefined) {
             return undefined;
@@ -2245,7 +2267,7 @@ namespace ts {
         exclude: excludeMatcher
     };
 
-    export function getRegularExpressionForWildcard(specs: ReadonlyArray<string>, basePath: string, usage: "files" | "directories" | "exclude"): string | undefined {
+    export function getRegularExpressionForWildcard(specs: ReadonlyArray<string> | undefined, basePath: string, usage: "files" | "directories" | "exclude"): string | undefined {
         const patterns = getRegularExpressionsForWildcards(specs, basePath, usage);
         if (!patterns || !patterns.length) {
             return undefined;
@@ -2257,7 +2279,7 @@ namespace ts {
         return `^(${pattern})${terminator}`;
     }
 
-    function getRegularExpressionsForWildcards(specs: ReadonlyArray<string>, basePath: string, usage: "files" | "directories" | "exclude"): string[] | undefined {
+    function getRegularExpressionsForWildcards(specs: ReadonlyArray<string> | undefined, basePath: string, usage: "files" | "directories" | "exclude"): string[] | undefined {
         if (specs === undefined || specs.length === 0) {
             return undefined;
         }
@@ -2279,7 +2301,7 @@ namespace ts {
         let hasRecursiveDirectoryWildcard = false;
         let hasWrittenComponent = false;
         const components = getNormalizedPathComponents(spec, basePath);
-        const lastComponent = lastOrUndefined(components);
+        const lastComponent = last(components);
         if (usage !== "exclude" && lastComponent === "**") {
             return undefined;
         }
@@ -2367,15 +2389,15 @@ namespace ts {
 
     export interface FileMatcherPatterns {
         /** One pattern for each "include" spec. */
-        includeFilePatterns: ReadonlyArray<string>;
+        includeFilePatterns: ReadonlyArray<string> | undefined;
         /** One pattern matching one of any of the "include" specs. */
-        includeFilePattern: string;
-        includeDirectoryPattern: string;
-        excludePattern: string;
+        includeFilePattern: string | undefined;
+        includeDirectoryPattern: string | undefined;
+        excludePattern: string | undefined;
         basePaths: ReadonlyArray<string>;
     }
 
-    export function getFileMatcherPatterns(path: string, excludes: ReadonlyArray<string>, includes: ReadonlyArray<string>, useCaseSensitiveFileNames: boolean, currentDirectory: string): FileMatcherPatterns {
+    export function getFileMatcherPatterns(path: string, excludes: ReadonlyArray<string> | undefined, includes: ReadonlyArray<string> | undefined, useCaseSensitiveFileNames: boolean, currentDirectory: string): FileMatcherPatterns {
         path = normalizePath(path);
         currentDirectory = normalizePath(currentDirectory);
         const absolutePath = combinePaths(currentDirectory, path);
@@ -2389,7 +2411,7 @@ namespace ts {
         };
     }
 
-    export function matchFiles(path: string, extensions: ReadonlyArray<string>, excludes: ReadonlyArray<string>, includes: ReadonlyArray<string>, useCaseSensitiveFileNames: boolean, currentDirectory: string, depth: number | undefined, getFileSystemEntries: (path: string) => FileSystemEntries): string[] {
+    export function matchFiles(path: string, extensions: ReadonlyArray<string> | undefined, excludes: ReadonlyArray<string> | undefined, includes: ReadonlyArray<string> | undefined, useCaseSensitiveFileNames: boolean, currentDirectory: string, depth: number | undefined, getFileSystemEntries: (path: string) => FileSystemEntries): string[] {
         path = normalizePath(path);
         currentDirectory = normalizePath(currentDirectory);
 
@@ -2414,7 +2436,7 @@ namespace ts {
         function visitDirectory(path: string, absolutePath: string, depth: number | undefined) {
             const { files, directories } = getFileSystemEntries(path);
 
-            for (const current of sort(files, comparer)) {
+            for (const current of sort<string>(files, comparer)) {
                 const name = combinePaths(path, current);
                 const absoluteName = combinePaths(absolutePath, current);
                 if (extensions && !fileExtensionIsOneOf(name, extensions)) continue;
@@ -2437,7 +2459,7 @@ namespace ts {
                 }
             }
 
-            for (const current of sort(directories, comparer)) {
+            for (const current of sort<string>(directories, comparer)) {
                 const name = combinePaths(path, current);
                 const absoluteName = combinePaths(absolutePath, current);
                 if ((!includeDirectoryRegex || includeDirectoryRegex.test(absoluteName)) &&
@@ -2451,7 +2473,7 @@ namespace ts {
     /**
      * Computes the unique non-wildcard base paths amongst the provided include patterns.
      */
-    function getBasePaths(path: string, includes: ReadonlyArray<string>, useCaseSensitiveFileNames: boolean) {
+    function getBasePaths(path: string, includes: ReadonlyArray<string> | undefined, useCaseSensitiveFileNames: boolean): string[] {
         // Storage for our results in the form of literal paths (e.g. the paths as written by the user).
         const basePaths: string[] = [path];
 
@@ -2534,7 +2556,7 @@ namespace ts {
         if (!extraFileExtensions || extraFileExtensions.length === 0 || !needAllExtensions) {
             return needAllExtensions ? allSupportedExtensions : supportedTypeScriptExtensions;
         }
-        return deduplicate(
+        return deduplicate<string>(
             [...allSupportedExtensions, ...extraFileExtensions.map(e => e.extension)],
             equateStringsCaseSensitive,
             compareStringsCaseSensitive
@@ -2898,10 +2920,7 @@ namespace ts {
      */
     export function extensionFromPath(path: string): Extension {
         const ext = tryGetExtensionFromPath(path);
-        if (ext !== undefined) {
-            return ext;
-        }
-        Debug.fail(`File ${path} has unknown extension.`);
+        return ext !== undefined ? ext : Debug.fail(`File ${path} has unknown extension.`);
     }
 
     export function isAnySupportedFileExtension(path: string): boolean {
@@ -3085,10 +3104,10 @@ namespace ts {
             }
             return host.readDirectory(rootDir, extensions, excludes, includes, depth);
 
-            function getFileSystemEntries(dir: string) {
+            function getFileSystemEntries(dir: string): FileSystemEntries {
                 const path = toPath(dir);
                 if (path === rootDirPath) {
-                    return result;
+                    return result!;
                 }
                 return getCachedFileSystemEntries(path) || createCachedFileSystemEntries(dir, path);
             }

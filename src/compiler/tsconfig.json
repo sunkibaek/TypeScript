@@ -2,6 +2,7 @@
     "extends": "../tsconfig-base",
     "compilerOptions": {
         "removeComments": true,
+        //"strictNullChecks": true,
         "outFile": "../../built/local/tsc.js",
         "declaration": true
     },

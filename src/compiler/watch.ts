@@ -236,7 +236,7 @@ namespace ts {
         let timerToUpdateProgram: any;                                      // timer callback to recompile the program
 
         const sourceFilesCache = createMap<HostFileInfo | string>();        // Cache that stores the source file and version info
-        let missingFilePathsRequestedForRelease: Path[];                    // These paths are held temparirly so that we can remove the entry from source file cache if the file is not tracked by missing files
+        let missingFilePathsRequestedForRelease: Path[] | undefined;        // These paths are held temparirly so that we can remove the entry from source file cache if the file is not tracked by missing files
         let hasChangedCompilerOptions = false;                              // True if the compiler options have changed between compilations
         let hasChangedAutomaticTypeDirectiveNames = false;                  // True if the automatic type directives have changed
 
@@ -378,7 +378,7 @@ namespace ts {
             return getDirectoryPath(normalizePath(system.getExecutingFilePath()));
         }
 
-        function getVersionedSourceFileByPath(fileName: string, path: Path, languageVersion: ScriptTarget, onError?: (message: string) => void, shouldCreateNewSourceFile?: boolean): SourceFile {
+        function getVersionedSourceFileByPath(fileName: string, path: Path, languageVersion: ScriptTarget, onError?: (message: string) => void, shouldCreateNewSourceFile?: boolean): SourceFile | undefined {
             const hostSourceFile = sourceFilesCache.get(path);
             // No source file on the host
             if (isString(hostSourceFile)) {
@@ -421,7 +421,7 @@ namespace ts {
             return hostSourceFile.sourceFile;
 
             function getNewSourceFile() {
-                let text: string;
+                let text: string | undefined;
                 try {
                     performance.mark("beforeIORead");
                     text = system.readFile(fileName, compilerOptions.charset);
@@ -449,7 +449,7 @@ namespace ts {
             }
         }
 
-        function getSourceVersion(path: Path): string {
+        function getSourceVersion(path: Path): string | undefined {
             const hostSourceFile = sourceFilesCache.get(path);
             return !hostSourceFile || isString(hostSourceFile) ? undefined : hostSourceFile.version.toString();
         }
@@ -507,9 +507,9 @@ namespace ts {
         }
 
         function reloadFileNamesFromConfigFile() {
-            const result = getFileNamesFromConfigSpecs(configFileSpecs, getDirectoryPath(configFileName), compilerOptions, directoryStructureHost);
-            if (!configFileSpecs.filesSpecs && result.fileNames.length === 0) {
-                reportDiagnostic(getErrorForNoInputFiles(configFileSpecs, configFileName));
+            const result = getFileNamesFromConfigSpecs(configFileSpecs!, getDirectoryPath(configFileName!), compilerOptions, directoryStructureHost);
+            if (!configFileSpecs!.filesSpecs && result.fileNames.length === 0) {
+                reportDiagnostic(getErrorForNoInputFiles(configFileSpecs!, configFileName));
             }
             rootFileNames = result.fileNames;
 
@@ -523,7 +523,7 @@ namespace ts {
 
             const cachedHost = directoryStructureHost as CachedDirectoryStructureHost;
             cachedHost.clearCache();
-            const configParseResult = parseConfigFile(configFileName, optionsToExtendForConfigFile, cachedHost, reportDiagnostic, reportWatchDiagnostic);
+            const configParseResult = parseConfigFile(configFileName!, optionsToExtendForConfigFile!, cachedHost, reportDiagnostic, reportWatchDiagnostic);
             rootFileNames = configParseResult.fileNames;
             compilerOptions = configParseResult.options;
             hasChangedCompilerOptions = true;
@@ -582,7 +582,7 @@ namespace ts {
             updateCachedSystemWithFile(fileName, missingFilePath, eventKind);
 
             if (eventKind === FileWatcherEventKind.Created && missingFilesMap.has(missingFilePath)) {
-                missingFilesMap.get(missingFilePath).close();
+                missingFilesMap.get(missingFilePath)!.close();
                 missingFilesMap.delete(missingFilePath);
 
                 // Delete the entry in the source files cache so that new source file is created
