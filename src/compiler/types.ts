@@ -709,7 +709,7 @@ namespace ts {
         kind: SignatureDeclaration["kind"];
         name?: PropertyName;
         typeParameters?: NodeArray<TypeParameterDeclaration>;
-        parameters: NodeArray<ParameterDeclaration>;
+        parameters: NodeArray<ParameterDeclaration> | undefined;
         type: TypeNode | undefined;
     }
 
@@ -941,7 +941,7 @@ namespace ts {
         kind: SyntaxKind.GetAccessor;
         parent?: ClassDeclaration | ClassExpression | ObjectLiteralExpression;
         name: PropertyName;
-        body: FunctionBody;
+        body: FunctionBody | undefined;
     }
 
     // See the comment on MethodDeclaration for the intuition behind SetAccessorDeclaration being a
@@ -950,7 +950,7 @@ namespace ts {
         kind: SyntaxKind.SetAccessor;
         parent?: ClassDeclaration | ClassExpression | ObjectLiteralExpression;
         name: PropertyName;
-        body: FunctionBody;
+        body: FunctionBody | undefined;
     }
 
     export type AccessorDeclaration = GetAccessorDeclaration | SetAccessorDeclaration;
@@ -1892,7 +1892,7 @@ namespace ts {
 
     export interface ThrowStatement extends Statement {
         kind: SyntaxKind.ThrowStatement;
-        expression: Expression;
+        expression: Expression | undefined;
     }
 
     export interface TryStatement extends Statement {
