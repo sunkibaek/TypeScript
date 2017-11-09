@@ -1822,14 +1822,14 @@ namespace ts {
 
     export interface ForInStatement extends IterationStatement {
         kind: SyntaxKind.ForInStatement;
-        initializer: ForInitializer;
+        initializer: ForInitializer | undefined;
         expression: Expression;
     }
 
     export interface ForOfStatement extends IterationStatement {
         kind: SyntaxKind.ForOfStatement;
         awaitModifier?: AwaitKeywordToken;
-        initializer: ForInitializer;
+        initializer: ForInitializer | undefined;
         expression: Expression;
     }
 
@@ -2348,7 +2348,7 @@ namespace ts {
 
     export interface AmdDependency {
         path: string;
-        name: string;
+        name: string | undefined;
     }
 
     /* @internal */
@@ -2390,7 +2390,7 @@ namespace ts {
         /* @internal */ redirectInfo?: RedirectInfo | undefined;
 
         amdDependencies: ReadonlyArray<AmdDependency>;
-        moduleName: string;
+        moduleName: string | undefined;
         referencedFiles: ReadonlyArray<FileReference>;
         typeReferenceDirectives: ReadonlyArray<FileReference>;
         languageVariant: LanguageVariant;
@@ -2414,9 +2414,9 @@ namespace ts {
         /* @internal */ scriptKind: ScriptKind;
 
         // The first node that causes this file to be an external module
-        /* @internal */ externalModuleIndicator: Node;
+        /* @internal */ externalModuleIndicator: Node | undefined;
         // The first node that causes this file to be a CommonJS module
-        /* @internal */ commonJsModuleIndicator: Node;
+        /* @internal */ commonJsModuleIndicator: Node | undefined;
 
         /* @internal */ identifiers: Map<string>; // Map from a string to an interned string
         /* @internal */ nodeCount: number;

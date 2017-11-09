@@ -294,7 +294,7 @@ namespace ts {
     }
 
     /* @internal */
-    export function stringToToken(s: string): SyntaxKind {
+    export function stringToToken(s: string): SyntaxKind | undefined {
         return textToToken.get(s);
     }
 
@@ -599,7 +599,7 @@ namespace ts {
     }
 
     function scanShebangTrivia(text: string, pos: number) {
-        const shebang = shebangTriviaRegex.exec(text)[0];
+        const shebang = shebangTriviaRegex.exec(text)![0];
         pos = pos + shebang.length;
         return pos;
     }
@@ -813,7 +813,7 @@ namespace ts {
         let tokenPos: number;
 
         let token: SyntaxKind;
-        let tokenValue: string;
+        let tokenValue: string | undefined;
         let precedingLineBreak: boolean;
         let hasExtendedUnicodeEscape: boolean;
         let tokenIsUnterminated: boolean;
@@ -826,8 +826,8 @@ namespace ts {
             getTextPos: () => pos,
             getToken: () => token,
             getTokenPos: () => tokenPos,
-            getTokenText: () => text.substring(tokenPos, pos),
-            getTokenValue: () => tokenValue,
+            getTokenText: () => text!.substring(tokenPos, pos),
+            getTokenValue: () => tokenValue!,
             hasExtendedUnicodeEscape: () => hasExtendedUnicodeEscape,
             hasPrecedingLineBreak: () => precedingLineBreak,
             isIdentifier: () => token === SyntaxKind.Identifier || token > SyntaxKind.LastReservedWord,
@@ -860,21 +860,25 @@ namespace ts {
             }
         }
 
+        function at(pos: number) {
+            return text!.charCodeAt(pos);
+        }
+
         function scanNumber(): string {
             const start = pos;
-            while (isDigit(text.charCodeAt(pos))) pos++;
-            if (text.charCodeAt(pos) === CharacterCodes.dot) {
+            while (isDigit(at(pos))) pos++;
+            if (at(pos) === CharacterCodes.dot) {
                 pos++;
-                while (isDigit(text.charCodeAt(pos))) pos++;
+                while (isDigit(at(pos))) pos++;
             }
             let end = pos;
-            if (text.charCodeAt(pos) === CharacterCodes.E || text.charCodeAt(pos) === CharacterCodes.e) {
+            if (at(pos) === CharacterCodes.E || at(pos) === CharacterCodes.e) {
                 pos++;
                 numericLiteralFlags = NumericLiteralFlags.Scientific;
-                if (text.charCodeAt(pos) === CharacterCodes.plus || text.charCodeAt(pos) === CharacterCodes.minus) pos++;
-                if (isDigit(text.charCodeAt(pos))) {
+                if (at(pos) === CharacterCodes.plus || at(pos) === CharacterCodes.minus) pos++;
+                if (isDigit(at(pos))) {
                     pos++;
-                    while (isDigit(text.charCodeAt(pos))) pos++;
+                    while (isDigit(at(pos))) pos++;
                     end = pos;
                 }
                 else {
@@ -886,7 +890,7 @@ namespace ts {
 
         function scanOctalDigits(): number {
             const start = pos;
-            while (isOctalDigit(text.charCodeAt(pos))) {
+            while (isOctalDigit(at(pos))) {
                 pos++;
             }
             return +(text.substring(start, pos));
@@ -912,7 +916,7 @@ namespace ts {
             let digits = 0;
             let value = 0;
             while (digits < minCount || scanAsManyAsPossible) {
-                const ch = text.charCodeAt(pos);
+                const ch = at(pos);
                 if (ch >= CharacterCodes._0 && ch <= CharacterCodes._9) {
                     value = value * 16 + ch - CharacterCodes._0;
                 }
@@ -935,7 +939,7 @@ namespace ts {
         }
 
         function scanString(allowEscapes = true): string {
-            const quote = text.charCodeAt(pos);
+            const quote = at(pos);
             pos++;
             let result = "";
             let start = pos;
@@ -946,7 +950,7 @@ namespace ts {
                     error(Diagnostics.Unterminated_string_literal);
                     break;
                 }
-                const ch = text.charCodeAt(pos);
+                const ch = at(pos);
                 if (ch === quote) {
                     result += text.substring(start, pos);
                     pos++;
@@ -974,7 +978,7 @@ namespace ts {
          * a literal component of a TemplateExpression.
          */
         function scanTemplateAndSetTokenValue(): SyntaxKind {
-            const startedWithBacktick = text.charCodeAt(pos) === CharacterCodes.backtick;
+            const startedWithBacktick = at(pos) === CharacterCodes.backtick;
 
             pos++;
             let start = pos;
@@ -990,7 +994,7 @@ namespace ts {
                     break;
                 }
 
-                const currChar = text.charCodeAt(pos);
+                const currChar = at(pos);
 
                 // '`'
                 if (currChar === CharacterCodes.backtick) {
@@ -1022,7 +1026,7 @@ namespace ts {
                     contents += text.substring(start, pos);
                     pos++;
 
-                    if (pos < end && text.charCodeAt(pos) === CharacterCodes.lineFeed) {
+                    if (pos < end && at(pos) === CharacterCodes.lineFeed) {
                         pos++;
                     }
 
@@ -1046,7 +1050,7 @@ namespace ts {
                 error(Diagnostics.Unexpected_end_of_text);
                 return "";
             }
-            const ch = text.charCodeAt(pos);
+            const ch = at(pos);
             pos++;
             switch (ch) {
                 case CharacterCodes._0:
@@ -1069,7 +1073,7 @@ namespace ts {
                     return "\"";
                 case CharacterCodes.u:
                     // '\u{DDDDDDDD}'
-                    if (pos < end && text.charCodeAt(pos) === CharacterCodes.openBrace) {
+                    if (pos < end && at(pos) === CharacterCodes.openBrace) {
                         hasExtendedUnicodeEscape = true;
                         pos++;
                         return scanExtendedUnicodeEscape();
@@ -1085,7 +1089,7 @@ namespace ts {
                 // when encountering a LineContinuation (i.e. a backslash and a line terminator sequence),
                 // the line terminator is interpreted to be "the empty code unit sequence".
                 case CharacterCodes.carriageReturn:
-                    if (pos < end && text.charCodeAt(pos) === CharacterCodes.lineFeed) {
+                    if (pos < end && at(pos) === CharacterCodes.lineFeed) {
                         pos++;
                     }
                     // falls through
@@ -1128,7 +1132,7 @@ namespace ts {
                 error(Diagnostics.Unexpected_end_of_text);
                 isInvalidExtendedEscape = true;
             }
-            else if (text.charCodeAt(pos) === CharacterCodes.closeBrace) {
+            else if (at(pos) === CharacterCodes.closeBrace) {
                 // Only swallow the following character up if it's a '}'.
                 pos++;
             }
@@ -1175,7 +1179,7 @@ namespace ts {
             let result = "";
             let start = pos;
             while (pos < end) {
-                let ch = text.charCodeAt(pos);
+                let ch = at(pos);
                 if (isIdentifierPart(ch, languageVersion)) {
                     pos++;
                 }
@@ -1221,7 +1225,7 @@ namespace ts {
             // Similarly valid octalIntegerLiteral must have at least one octal digit following o or O.
             let numberOfDigits = 0;
             while (true) {
-                const ch = text.charCodeAt(pos);
+                const ch = at(pos);
                 const valueOfCh = ch - CharacterCodes._0;
                 if (!isDigit(ch) || valueOfCh >= base) {
                     break;
@@ -1248,7 +1252,7 @@ namespace ts {
                 if (pos >= end) {
                     return token = SyntaxKind.EndOfFileToken;
                 }
-                let ch = text.charCodeAt(pos);
+                let ch = at(pos);
 
                 // Special handling for shebang
                 if (ch === CharacterCodes.hash && pos === 0 && isShebangTrivia(text, pos)) {
@@ -1288,7 +1292,7 @@ namespace ts {
                             continue;
                         }
                         else {
-                            while (pos < end && isWhiteSpaceSingleLine(text.charCodeAt(pos))) {
+                            while (pos < end && isWhiteSpaceSingleLine(at(pos))) {
                                 pos++;
                             }
                             return token = SyntaxKind.WhitespaceTrivia;
@@ -1378,7 +1382,7 @@ namespace ts {
                             pos += 2;
 
                             while (pos < end) {
-                                if (isLineBreak(text.charCodeAt(pos))) {
+                                if (isLineBreak(at(pos))) {
                                     break;
                                 }
                                 pos++;
@@ -1398,7 +1402,7 @@ namespace ts {
 
                             let commentClosed = false;
                             while (pos < end) {
-                                const ch = text.charCodeAt(pos);
+                                const ch = at(pos);
 
                                 if (ch === CharacterCodes.asterisk && text.charCodeAt(pos + 1) === CharacterCodes.slash) {
                                     pos += 2;
@@ -1614,7 +1618,7 @@ namespace ts {
                     default:
                         if (isIdentifierStart(ch, languageVersion)) {
                             pos++;
-                            while (pos < end && isIdentifierPart(ch = text.charCodeAt(pos), languageVersion)) pos++;
+                            while (pos < end && isIdentifierPart(ch = at(pos), languageVersion)) pos++;
                             tokenValue = text.substring(tokenPos, pos);
                             if (ch === CharacterCodes.backslash) {
                                 tokenValue += scanIdentifierParts();
@@ -1639,7 +1643,7 @@ namespace ts {
 
         function reScanGreaterToken(): SyntaxKind {
             if (token === SyntaxKind.GreaterThanToken) {
-                if (text.charCodeAt(pos) === CharacterCodes.greaterThan) {
+                if (at(pos) === CharacterCodes.greaterThan) {
                     if (text.charCodeAt(pos + 1) === CharacterCodes.greaterThan) {
                         if (text.charCodeAt(pos + 2) === CharacterCodes.equals) {
                             return pos += 3, token = SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken;
@@ -1652,7 +1656,7 @@ namespace ts {
                     pos++;
                     return token = SyntaxKind.GreaterThanGreaterThanToken;
                 }
-                if (text.charCodeAt(pos) === CharacterCodes.equals) {
+                if (at(pos) === CharacterCodes.equals) {
                     pos++;
                     return token = SyntaxKind.GreaterThanEqualsToken;
                 }
@@ -1735,7 +1739,7 @@ namespace ts {
                 return token = SyntaxKind.EndOfFileToken;
             }
 
-            let char = text.charCodeAt(pos);
+            let char = at(pos);
             if (char === CharacterCodes.lessThan) {
                 if (text.charCodeAt(pos + 1) === CharacterCodes.slash) {
                     pos += 2;
@@ -1756,7 +1760,7 @@ namespace ts {
             // firstNonWhitespace = 0 to indicate that we want leading whitspace,
 
             while (pos < end) {
-                char = text.charCodeAt(pos);
+                char = at(pos);
                 if (char === CharacterCodes.openBrace) {
                     break;
                 }
@@ -1792,7 +1796,7 @@ namespace ts {
             if (tokenIsIdentifierOrKeyword(token)) {
                 const firstCharPosition = pos;
                 while (pos < end) {
-                    const ch = text.charCodeAt(pos);
+                    const ch = at(pos);
                     if (ch === CharacterCodes.minus || ((firstCharPosition === pos) ? isIdentifierStart(ch, languageVersion) : isIdentifierPart(ch, languageVersion))) {
                         pos++;
                     }
@@ -1808,7 +1812,7 @@ namespace ts {
         function scanJsxAttributeValue(): SyntaxKind {
             startPos = pos;
 
-            switch (text.charCodeAt(pos)) {
+            switch (at(pos)) {
                 case CharacterCodes.doubleQuote:
                 case CharacterCodes.singleQuote:
                     tokenValue = scanString(/*allowEscapes*/ false);
@@ -1827,13 +1831,13 @@ namespace ts {
             startPos = pos;
             tokenPos = pos;
 
-            const ch = text.charCodeAt(pos);
+            const ch = at(pos);
             switch (ch) {
                 case CharacterCodes.tab:
                 case CharacterCodes.verticalTab:
                 case CharacterCodes.formFeed:
                 case CharacterCodes.space:
-                    while (pos < end && isWhiteSpaceSingleLine(text.charCodeAt(pos))) {
+                    while (pos < end && isWhiteSpaceSingleLine(at(pos))) {
                         pos++;
                     }
                     return token = SyntaxKind.WhitespaceTrivia;
@@ -1878,7 +1882,7 @@ namespace ts {
 
             if (isIdentifierStart(ch, ScriptTarget.Latest)) {
                 pos++;
-                while (isIdentifierPart(text.charCodeAt(pos), ScriptTarget.Latest) && pos < end) {
+                while (isIdentifierPart(at(pos), ScriptTarget.Latest) && pos < end) {
                     pos++;
                 }
                 return token = SyntaxKind.Identifier;
@@ -1946,12 +1950,12 @@ namespace ts {
         }
 
         function getText(): string {
-            return text;
+            return text!;
         }
 
-        function setText(newText: string, start: number, length: number) {
+        function setText(newText: string | undefined, start: number | undefined, length: number | undefined) {
             text = newText || "";
-            end = length === undefined ? text.length : start + length;
+            end = length === undefined ? text.length : start! + length;
             setTextPos(start || 0);
         }
 
