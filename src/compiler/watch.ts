@@ -22,14 +22,14 @@ namespace ts {
         afterCompile(host: DirectoryStructureHost, program: Program, builder: Builder): void;
     }
 
-    const defaultFormatDiagnosticsHost: FormatDiagnosticsHost = sys ? {
+    const defaultFormatDiagnosticsHost: FormatDiagnosticsHost | undefined = sys ? {
         getCurrentDirectory: () => sys.getCurrentDirectory(),
         getNewLine: () => sys.newLine,
         getCanonicalFileName: createGetCanonicalFileName(sys.useCaseSensitiveFileNames)
     } : undefined;
 
     export function createDiagnosticReporter(system = sys, worker = reportDiagnosticSimply, formatDiagnosticsHost?: FormatDiagnosticsHost): DiagnosticReporter {
-        return diagnostic => worker(diagnostic, getFormatDiagnosticsHost(), system);
+        return diagnostic => worker(diagnostic, getFormatDiagnosticsHost()!, system);
 
         function getFormatDiagnosticsHost() {
             return formatDiagnosticsHost || (formatDiagnosticsHost = system === sys ? defaultFormatDiagnosticsHost : {
@@ -63,21 +63,19 @@ namespace ts {
     }
 
     export function parseConfigFile(configFileName: string, optionsToExtend: CompilerOptions, system: DirectoryStructureHost, reportDiagnostic: DiagnosticReporter, reportWatchDiagnostic: DiagnosticReporter): ParsedCommandLine {
-        let configFileText: string;
+        let configFileText: string | undefined;
         try {
             configFileText = system.readFile(configFileName);
         }
         catch (e) {
             const error = createCompilerDiagnostic(Diagnostics.Cannot_read_file_0_Colon_1, configFileName, e.message);
             reportWatchDiagnostic(error);
-            system.exit(ExitStatus.DiagnosticsPresent_OutputsSkipped);
-            return;
+            throw system.exit(ExitStatus.DiagnosticsPresent_OutputsSkipped);
         }
         if (!configFileText) {
             const error = createCompilerDiagnostic(Diagnostics.File_0_not_found, configFileName);
             reportDiagnostics([error], reportDiagnostic);
-            system.exit(ExitStatus.DiagnosticsPresent_OutputsSkipped);
-            return;
+            throw system.exit(ExitStatus.DiagnosticsPresent_OutputsSkipped);
         }
 
         const result = parseJsonText(configFileName, configFileText);
@@ -90,7 +88,7 @@ namespace ts {
         return configParseResult;
     }
 
-    function reportEmittedFiles(files: string[], system: DirectoryStructureHost): void {
+    function reportEmittedFiles(files: string[] | undefined, system: DirectoryStructureHost): void {
         if (!files || files.length === 0) {
             return;
         }
@@ -102,7 +100,7 @@ namespace ts {
     }
 
     export function handleEmitOutputAndReportErrors(system: DirectoryStructureHost, program: Program,
-        emittedFiles: string[], emitSkipped: boolean,
+        emittedFiles: string[] | undefined, emitSkipped: boolean,
         diagnostics: Diagnostic[], reportDiagnostic: DiagnosticReporter
     ): ExitStatus {
         reportDiagnostics(sortAndDeduplicateDiagnostics(diagnostics), reportDiagnostic);
@@ -159,9 +157,9 @@ namespace ts {
             }
 
             // Emit and report any errors we ran into.
-            const emittedFiles: string[] = program.getCompilerOptions().listEmittedFiles ? [] : undefined;
-            let sourceMaps: SourceMapData[];
-            let emitSkipped: boolean;
+            const emittedFiles: string[] | undefined = program.getCompilerOptions().listEmittedFiles ? [] : undefined;
+            let sourceMaps: SourceMapData[] | undefined;
+            let emitSkipped = false;
 
             const result = builder.emitChangedFiles(program, writeFile);
             if (result.length === 0) {
@@ -181,7 +179,7 @@ namespace ts {
                 addRange(diagnostics, builder.getSemanticDiagnostics(program));
             }
             return handleEmitOutputAndReportErrors(host, program, emittedFiles, emitSkipped,
-                diagnostics, reportDiagnostic);
+                diagnostics, reportDiagnostic!);
 
             function ensureDirectoriesExist(directoryPath: string) {
                 if (directoryPath.length > getRootLength(directoryPath) && !host.directoryExists(directoryPath)) {
@@ -255,8 +253,8 @@ namespace ts {
         }
 
         const getCurrentDirectory = memoize(() => directoryStructureHost.getCurrentDirectory());
-        const realpath = system.realpath && ((path: string) => system.realpath(path));
-        const getCachedDirectoryStructureHost = configFileName && (() => directoryStructureHost as CachedDirectoryStructureHost);
+        const realpath = system.realpath && ((path: string) => system.realpath!(path));
+        const getCachedDirectoryStructureHost = configFileName === undefined ? undefined : () => directoryStructureHost as CachedDirectoryStructureHost;
         const getCanonicalFileName = createGetCanonicalFileName(system.useCaseSensitiveFileNames);
         let newLine = getNewLineCharacter(compilerOptions, system);
 

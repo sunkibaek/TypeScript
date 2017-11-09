@@ -472,7 +472,7 @@ namespace ts {
         name: string | PropertyName,
         parameters: ReadonlyArray<ParameterDeclaration>,
         type: TypeNode | undefined,
-        body: Block | undefined) {
+        body: Block) {
         const node = <GetAccessorDeclaration>createSynthesizedNode(SyntaxKind.GetAccessor);
         node.decorators = asNodeArray(decorators);
         node.modifiers = asNodeArray(modifiers);
@@ -507,7 +507,7 @@ namespace ts {
         modifiers: ReadonlyArray<Modifier> | undefined,
         name: string | PropertyName,
         parameters: ReadonlyArray<ParameterDeclaration>,
-        body: Block | undefined) {
+        body: Block) {
         const node = <SetAccessorDeclaration>createSynthesizedNode(SyntaxKind.SetAccessor);
         node.decorators = asNodeArray(decorators);
         node.modifiers = asNodeArray(modifiers);
@@ -1166,7 +1166,7 @@ namespace ts {
         node.condition = parenthesizeForConditionalHead(condition);
         node.questionToken = whenFalse ? <QuestionToken>questionTokenOrWhenTrue : createToken(SyntaxKind.QuestionToken);
         node.whenTrue = parenthesizeSubexpressionOfConditionalExpression(whenFalse ? whenTrueOrWhenFalse : <Expression>questionTokenOrWhenTrue);
-        node.colonToken = whenFalse ? colonToken : createToken(SyntaxKind.ColonToken);
+        node.colonToken = whenFalse ? colonToken! : createToken(SyntaxKind.ColonToken);
         node.whenFalse = parenthesizeSubexpressionOfConditionalExpression(whenFalse ? whenFalse : whenTrueOrWhenFalse);
         return node;
     }
@@ -1498,7 +1498,7 @@ namespace ts {
             : node;
     }
 
-    export function createForOf(awaitModifier: AwaitKeywordToken, initializer: ForInitializer, expression: Expression, statement: Statement) {
+    export function createForOf(awaitModifier: AwaitKeywordToken | undefined, initializer: ForInitializer, expression: Expression, statement: Statement) {
         const node = <ForOfStatement>createSynthesizedNode(SyntaxKind.ForOfStatement);
         node.awaitModifier = awaitModifier;
         node.initializer = initializer;
@@ -1507,7 +1507,7 @@ namespace ts {
         return node;
     }
 
-    export function updateForOf(node: ForOfStatement, awaitModifier: AwaitKeywordToken, initializer: ForInitializer, expression: Expression, statement: Statement) {
+    export function updateForOf(node: ForOfStatement, awaitModifier: AwaitKeywordToken | undefined, initializer: ForInitializer, expression: Expression, statement: Statement) {
         return node.awaitModifier !== awaitModifier
             || node.initializer !== initializer
             || node.expression !== expression
@@ -2546,12 +2546,7 @@ namespace ts {
 
     // Utilities
 
-    function asName(name: string | Identifier): Identifier;
-    function asName(name: string | BindingName): BindingName;
-    function asName(name: string | PropertyName): PropertyName;
-    function asName(name: string | EntityName): EntityName;
-    function asName(name: string | Identifier | ThisTypeNode): Identifier | ThisTypeNode;
-    function asName(name: string | Identifier | BindingName | PropertyName | QualifiedName | ThisTypeNode) {
+    function asName<T extends Identifier | BindingName | PropertyName | EntityName | ThisTypeNode | undefined>(name: string | T): T | Identifier {
         return isString(name) ? createIdentifier(name) : name;
     }
 
@@ -2559,6 +2554,8 @@ namespace ts {
         return isString(value) || typeof value === "number" ? createLiteral(value) : value;
     }
 
+    function asNodeArray<T extends Node>(array: ReadonlyArray<T>): NodeArray<T>;
+    function asNodeArray<T extends Node>(array: ReadonlyArray<T> | undefined): NodeArray<T> | undefined;
     function asNodeArray<T extends Node>(array: ReadonlyArray<T> | undefined): NodeArray<T> | undefined {
         return array ? createNodeArray(array) : undefined;
     }

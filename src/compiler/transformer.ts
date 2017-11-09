@@ -100,7 +100,7 @@ namespace ts {
         let lexicalEnvironmentFunctionDeclarationsStack: FunctionDeclaration[][] = [];
         let lexicalEnvironmentStackOffset = 0;
         let lexicalEnvironmentSuspended = false;
-        let emitHelpers: EmitHelper[];
+        let emitHelpers: EmitHelper[] | undefined;
         let onSubstituteNode: TransformationContext["onSubstituteNode"] = (_, node) => node;
         let onEmitNode: TransformationContext["onEmitNode"] = (hint, node, callback) => callback(hint, node);
         let state = TransformationState.Uninitialized;
@@ -279,8 +279,8 @@ namespace ts {
             lexicalEnvironmentVariableDeclarationsStack[lexicalEnvironmentStackOffset] = lexicalEnvironmentVariableDeclarations;
             lexicalEnvironmentFunctionDeclarationsStack[lexicalEnvironmentStackOffset] = lexicalEnvironmentFunctionDeclarations;
             lexicalEnvironmentStackOffset++;
-            lexicalEnvironmentVariableDeclarations = undefined;
-            lexicalEnvironmentFunctionDeclarations = undefined;
+            lexicalEnvironmentVariableDeclarations = undefined!;
+            lexicalEnvironmentFunctionDeclarations = undefined!;
         }
 
         /** Suspends the current lexical environment, usually after visiting a parameter list. */
@@ -303,12 +303,12 @@ namespace ts {
          * Ends a lexical environment. The previous set of hoisted declarations are restored and
          * any hoisted declarations added in this environment are returned.
          */
-        function endLexicalEnvironment(): Statement[] {
+        function endLexicalEnvironment(): Statement[] | undefined {
             Debug.assert(state > TransformationState.Uninitialized, "Cannot modify the lexical environment during initialization.");
             Debug.assert(state < TransformationState.Completed, "Cannot modify the lexical environment after transformation has completed.");
             Debug.assert(!lexicalEnvironmentSuspended, "Lexical environment is suspended.");
 
-            let statements: Statement[];
+            let statements: Statement[] | undefined;
             if (lexicalEnvironmentVariableDeclarations || lexicalEnvironmentFunctionDeclarations) {
                 if (lexicalEnvironmentFunctionDeclarations) {
                     statements = [...lexicalEnvironmentFunctionDeclarations];
@@ -363,12 +363,12 @@ namespace ts {
                 }
 
                 // Release references to external entries for GC purposes.
-                lexicalEnvironmentVariableDeclarations = undefined;
-                lexicalEnvironmentVariableDeclarationsStack = undefined;
-                lexicalEnvironmentFunctionDeclarations = undefined;
-                lexicalEnvironmentFunctionDeclarationsStack = undefined;
-                onSubstituteNode = undefined;
-                onEmitNode = undefined;
+                lexicalEnvironmentVariableDeclarations = undefined!;
+                lexicalEnvironmentVariableDeclarationsStack = undefined!;
+                lexicalEnvironmentFunctionDeclarations = undefined!;
+                lexicalEnvironmentFunctionDeclarationsStack = undefined!;
+                onSubstituteNode = undefined!;
+                onEmitNode = undefined!;
                 emitHelpers = undefined;
 
                 // Prevent further use of the transformation result.

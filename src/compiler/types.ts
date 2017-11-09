@@ -2668,11 +2668,11 @@ namespace ts {
         getNonNullableType(type: Type): Type;
 
         /** Note that the resulting nodes cannot be checked. */
-        typeToTypeNode(type: Type, enclosingDeclaration?: Node, flags?: NodeBuilderFlags): TypeNode;
+        typeToTypeNode(type: Type, enclosingDeclaration?: Node, flags?: NodeBuilderFlags): TypeNode | undefined;
         /** Note that the resulting nodes cannot be checked. */
-        signatureToSignatureDeclaration(signature: Signature, kind: SyntaxKind, enclosingDeclaration?: Node, flags?: NodeBuilderFlags): SignatureDeclaration;
+        signatureToSignatureDeclaration(signature: Signature, kind: SyntaxKind, enclosingDeclaration?: Node, flags?: NodeBuilderFlags): SignatureDeclaration | undefined;
         /** Note that the resulting nodes cannot be checked. */
-        indexInfoToIndexSignatureDeclaration(indexInfo: IndexInfo, kind: IndexKind, enclosingDeclaration?: Node, flags?: NodeBuilderFlags): IndexSignatureDeclaration;
+        indexInfoToIndexSignatureDeclaration(indexInfo: IndexInfo, kind: IndexKind, enclosingDeclaration?: Node, flags?: NodeBuilderFlags): IndexSignatureDeclaration | undefined;
 
         getSymbolsInScope(location: Node, meaning: SymbolFlags): Symbol[];
         getSymbolAtLocation(node: Node): Symbol | undefined;
@@ -4203,7 +4203,7 @@ namespace ts {
     }
 
     export interface ResolvedTypeReferenceDirectiveWithFailedLookupLocations {
-        readonly resolvedTypeReferenceDirective: ResolvedTypeReferenceDirective;
+        readonly resolvedTypeReferenceDirective: ResolvedTypeReferenceDirective | undefined;
         readonly failedLookupLocations: ReadonlyArray<string>;
     }
 

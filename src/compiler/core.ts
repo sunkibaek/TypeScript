@@ -1058,9 +1058,9 @@ namespace ts {
         return ~low;
     }
 
-    export function reduceLeft<T, U>(array: ReadonlyArray<T>, f: (memo: U, value: T, i: number) => U, initial: U, start?: number, count?: number): U;
-    export function reduceLeft<T>(array: ReadonlyArray<T>, f: (memo: T, value: T, i: number) => T): T;
-    export function reduceLeft<T>(array: T[], f: (memo: T, value: T, i: number) => T, initial?: T, start?: number, count?: number): T {
+    export function reduceLeft<T, U>(array: ReadonlyArray<T> | undefined, f: (memo: U, value: T, i: number) => U, initial: U, start?: number, count?: number): U;
+    export function reduceLeft<T>(array: ReadonlyArray<T>, f: (memo: T, value: T, i: number) => T): T | undefined;
+    export function reduceLeft<T>(array: T[], f: (memo: T, value: T, i: number) => T, initial?: T, start?: number, count?: number): T | undefined {
         if (array && array.length > 0) {
             const size = array.length;
             if (size > 0) {
@@ -1464,7 +1464,7 @@ namespace ts {
         return localizedDiagnosticMessages && localizedDiagnosticMessages[message.key] || message.message;
     }
 
-    export function createFileDiagnostic(file: SourceFile, start: number, length: number, message: DiagnosticMessage, ...args: (string | number)[]): Diagnostic;
+    export function createFileDiagnostic(file: SourceFile, start: number, length: number, message: DiagnosticMessage, ...args: (string | number | undefined)[]): Diagnostic;
     export function createFileDiagnostic(file: SourceFile, start: number, length: number, message: DiagnosticMessage): Diagnostic {
         Debug.assertGreaterThanOrEqual(start, 0);
         Debug.assertGreaterThanOrEqual(length, 0);
