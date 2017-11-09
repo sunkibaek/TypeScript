@@ -805,7 +805,7 @@ namespace ts {
         kind: SyntaxKind.PropertyAssignment;
         name: PropertyName;
         questionToken?: QuestionToken;
-        initializer: Expression;
+        initializer: Expression | undefined;
     }
 
     export interface ShorthandPropertyAssignment extends ObjectLiteralElement, JSDocContainer {
@@ -4339,7 +4339,7 @@ namespace ts {
         trailingComments?: SynthesizedComment[]; // Synthesized trailing comments
         commentRange?: TextRange;                // The text range to use when emitting leading or trailing comments
         sourceMapRange?: SourceMapRange;         // The text range to use when emitting leading or trailing source mappings
-        tokenSourceMapRanges?: SourceMapRange[]; // The text range to use when emitting source mappings for tokens
+        tokenSourceMapRanges?: (SourceMapRange | undefined)[]; // The text range to use when emitting source mappings for tokens
         constantValue?: string | number;         // The constant value of an expression
         externalHelpersModuleName?: Identifier;  // The local name for an imported helpers module
         helpers?: EmitHelper[];                  // Emit helpers for the node

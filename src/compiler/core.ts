@@ -886,6 +886,8 @@ namespace ts {
      * @param start The offset in `from` at which to start copying values.
      * @param end The offset in `from` at which to stop copying values (non-inclusive).
      */
+    export function addRange<T>(to: T[], from: ReadonlyArray<T> | undefined, start?: number, end?: number): T[];
+    export function addRange<T>(to: T[] | undefined, from: ReadonlyArray<T> | undefined, start?: number, end?: number): T[] | undefined;
     export function addRange<T>(to: T[] | undefined, from: ReadonlyArray<T> | undefined, start?: number, end?: number): T[] | undefined {
         if (from === undefined || from.length === 0) return to;
         if (to === undefined) return from.slice(start, end);

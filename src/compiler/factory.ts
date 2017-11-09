@@ -44,13 +44,13 @@ namespace ts {
      * Creates a shallow, memberwise clone of a node with no source map location.
      */
     /* @internal */
-    export function getSynthesizedClone<T extends Node>(node: T | undefined): T | undefined {
+    export function getSynthesizedClone<T extends Node>(node: T): T {
         // We don't use "clone" from core.ts here, as we need to preserve the prototype chain of
         // the original node. We also need to exclude specific properties and only include own-
         // properties (to skip members already defined on the shared prototype).
 
         if (node === undefined) {
-            return undefined;
+            return node;
         }
 
         const clone = <T>createSynthesizedNode(node.kind);
@@ -113,7 +113,7 @@ namespace ts {
     export function createIdentifier(text: string): Identifier;
     /* @internal */
     // tslint:disable-next-line unified-signatures
-    export function createIdentifier(text: string, typeArguments: ReadonlyArray<TypeNode>): Identifier;
+    export function createIdentifier(text: string, typeArguments: ReadonlyArray<TypeNode> | undefined): Identifier;
     export function createIdentifier(text: string, typeArguments?: ReadonlyArray<TypeNode>): Identifier {
         const node = <Identifier>createSynthesizedNode(SyntaxKind.Identifier);
         node.escapedText = escapeLeadingUnderscores(text);
@@ -472,7 +472,7 @@ namespace ts {
         name: string | PropertyName,
         parameters: ReadonlyArray<ParameterDeclaration>,
         type: TypeNode | undefined,
-        body: Block) {
+        body: Block | undefined) {
         const node = <GetAccessorDeclaration>createSynthesizedNode(SyntaxKind.GetAccessor);
         node.decorators = asNodeArray(decorators);
         node.modifiers = asNodeArray(modifiers);
@@ -507,7 +507,7 @@ namespace ts {
         modifiers: ReadonlyArray<Modifier> | undefined,
         name: string | PropertyName,
         parameters: ReadonlyArray<ParameterDeclaration>,
-        body: Block) {
+        body: Block | undefined) {
         const node = <SetAccessorDeclaration>createSynthesizedNode(SyntaxKind.SetAccessor);
         node.decorators = asNodeArray(decorators);
         node.modifiers = asNodeArray(modifiers);
@@ -863,7 +863,7 @@ namespace ts {
             : node;
     }
 
-    export function createPropertyAccess(expression: Expression, name: string | Identifier) {
+    export function createPropertyAccess(expression: Expression, name: string | Identifier | undefined) {
         const node = <PropertyAccessExpression>createSynthesizedNode(SyntaxKind.PropertyAccessExpression);
         node.expression = parenthesizeForAccess(expression);
         node.name = asName(name);
@@ -880,7 +880,7 @@ namespace ts {
             : node;
     }
 
-    export function createElementAccess(expression: Expression, index: number | Expression) {
+    export function createElementAccess(expression: Expression, index: number | Expression | undefined) {
         const node = <ElementAccessExpression>createSynthesizedNode(SyntaxKind.ElementAccessExpression);
         node.expression = parenthesizeForAccess(expression);
         node.argumentExpression = asExpression(index);
@@ -971,7 +971,7 @@ namespace ts {
         asteriskToken: AsteriskToken | undefined,
         name: string | Identifier | undefined,
         typeParameters: ReadonlyArray<TypeParameterDeclaration> | undefined,
-        parameters: ReadonlyArray<ParameterDeclaration>,
+        parameters: ReadonlyArray<ParameterDeclaration> | undefined,
         type: TypeNode | undefined,
         body: Block) {
         const node = <FunctionExpression>createSynthesizedNode(SyntaxKind.FunctionExpression);
@@ -1238,8 +1238,8 @@ namespace ts {
     }
 
     export function createYield(expression?: Expression): YieldExpression;
-    export function createYield(asteriskToken: AsteriskToken, expression: Expression): YieldExpression;
-    export function createYield(asteriskTokenOrExpression?: AsteriskToken | Expression, expression?: Expression) {
+    export function createYield(asteriskToken: AsteriskToken | undefined, expression: Expression): YieldExpression;
+    export function createYield(asteriskTokenOrExpression?: AsteriskToken | undefined | Expression, expression?: Expression) {
         const node = <YieldExpression>createSynthesizedNode(SyntaxKind.YieldExpression);
         node.asteriskToken = asteriskTokenOrExpression && asteriskTokenOrExpression.kind === SyntaxKind.AsteriskToken ? <AsteriskToken>asteriskTokenOrExpression : undefined;
         node.expression = asteriskTokenOrExpression && asteriskTokenOrExpression.kind !== SyntaxKind.AsteriskToken ? <Expression>asteriskTokenOrExpression : expression;
@@ -1644,7 +1644,7 @@ namespace ts {
 
     export function createVariableDeclarationList(declarations: ReadonlyArray<VariableDeclaration>, flags?: NodeFlags) {
         const node = <VariableDeclarationList>createSynthesizedNode(SyntaxKind.VariableDeclarationList);
-        node.flags |= flags & NodeFlags.BlockScoped;
+        node.flags |= flags! & NodeFlags.BlockScoped;
         node.declarations = createNodeArray(declarations);
         return node;
     }
@@ -1828,7 +1828,7 @@ namespace ts {
 
     export function createModuleDeclaration(decorators: ReadonlyArray<Decorator> | undefined, modifiers: ReadonlyArray<Modifier> | undefined, name: ModuleName, body: ModuleBody | undefined, flags?: NodeFlags) {
         const node = <ModuleDeclaration>createSynthesizedNode(SyntaxKind.ModuleDeclaration);
-        node.flags |= flags & (NodeFlags.Namespace | NodeFlags.NestedNamespace | NodeFlags.GlobalAugmentation);
+        node.flags |= flags! & (NodeFlags.Namespace | NodeFlags.NestedNamespace | NodeFlags.GlobalAugmentation);
         node.decorators = asNodeArray(decorators);
         node.modifiers = asNodeArray(modifiers);
         node.name = name;
@@ -1903,7 +1903,7 @@ namespace ts {
         decorators: ReadonlyArray<Decorator> | undefined,
         modifiers: ReadonlyArray<Modifier> | undefined,
         importClause: ImportClause | undefined,
-        moduleSpecifier?: Expression): ImportDeclaration {
+        moduleSpecifier: Expression): ImportDeclaration {
         const node = <ImportDeclaration>createSynthesizedNode(SyntaxKind.ImportDeclaration);
         node.decorators = asNodeArray(decorators);
         node.modifiers = asNodeArray(modifiers);
@@ -1917,7 +1917,7 @@ namespace ts {
         decorators: ReadonlyArray<Decorator> | undefined,
         modifiers: ReadonlyArray<Modifier> | undefined,
         importClause: ImportClause | undefined,
-        moduleSpecifier: Expression | undefined) {
+        moduleSpecifier: Expression) {
         return node.decorators !== decorators
             || node.modifiers !== modifiers
             || node.importClause !== importClause
@@ -1978,7 +1978,7 @@ namespace ts {
             : node;
     }
 
-    export function createExportAssignment(decorators: ReadonlyArray<Decorator> | undefined, modifiers: ReadonlyArray<Modifier> | undefined, isExportEquals: boolean, expression: Expression) {
+    export function createExportAssignment(decorators: ReadonlyArray<Decorator> | undefined, modifiers: ReadonlyArray<Modifier> | undefined, isExportEquals: boolean | undefined, expression: Expression) {
         const node = <ExportAssignment>createSynthesizedNode(SyntaxKind.ExportAssignment);
         node.decorators = asNodeArray(decorators);
         node.modifiers = asNodeArray(modifiers);
@@ -2271,7 +2271,7 @@ namespace ts {
 
     export function createSpreadAssignment(expression: Expression) {
         const node = <SpreadAssignment>createSynthesizedNode(SyntaxKind.SpreadAssignment);
-        node.expression = expression !== undefined ? parenthesizeExpressionForList(expression) : undefined;
+        node.expression = expression !== undefined ? parenthesizeExpressionForList(expression) : undefined!; //fishy
         return node;
     }
 
@@ -2550,7 +2550,7 @@ namespace ts {
         return isString(name) ? createIdentifier(name) : name;
     }
 
-    function asExpression(value: string | number | Expression) {
+    function asExpression(value: string | number | Expression | undefined) {
         return isString(value) || typeof value === "number" ? createLiteral(value) : value;
     }
 
@@ -2601,7 +2601,7 @@ namespace ts {
                 }
 
                 const sourceFile = getSourceFileOfNode(node);
-                getOrCreateEmitNode(sourceFile).annotatedNodes.push(node);
+                getOrCreateEmitNode(sourceFile).annotatedNodes!.push(node);
             }
 
             node.emitNode = {};
@@ -2632,7 +2632,7 @@ namespace ts {
     /* @internal */
     export function addEmitFlags<T extends Node>(node: T, emitFlags: EmitFlags) {
         const emitNode = getOrCreateEmitNode(node);
-        emitNode.flags = emitNode.flags | emitFlags;
+        emitNode.flags = emitNode.flags! | emitFlags;
         return node;
     }
 
@@ -2720,7 +2720,7 @@ namespace ts {
         return emitNode && emitNode.leadingComments;
     }
 
-    export function setSyntheticLeadingComments<T extends Node>(node: T, comments: SynthesizedComment[]) {
+    export function setSyntheticLeadingComments<T extends Node>(node: T, comments: SynthesizedComment[] | undefined) {
         getOrCreateEmitNode(node).leadingComments = comments;
         return node;
     }
@@ -2734,7 +2734,7 @@ namespace ts {
         return emitNode && emitNode.trailingComments;
     }
 
-    export function setSyntheticTrailingComments<T extends Node>(node: T, comments: SynthesizedComment[]) {
+    export function setSyntheticTrailingComments<T extends Node>(node: T, comments: SynthesizedComment[] | undefined) {
         getOrCreateEmitNode(node).trailingComments = comments;
         return node;
     }
@@ -2775,7 +2775,7 @@ namespace ts {
     export function addEmitHelpers<T extends Node>(node: T, helpers: EmitHelper[] | undefined): T {
         if (some(helpers)) {
             const emitNode = getOrCreateEmitNode(node);
-            for (const helper of helpers) {
+            for (const helper of helpers!) {
                 emitNode.helpers = appendIfUnique(emitNode.helpers, helper);
             }
         }
@@ -2814,19 +2814,19 @@ namespace ts {
 
         const targetEmitNode = getOrCreateEmitNode(target);
         let helpersRemoved = 0;
-        for (let i = 0; i < sourceEmitHelpers.length; i++) {
-            const helper = sourceEmitHelpers[i];
+        for (let i = 0; i < sourceEmitHelpers!.length; i++) {
+            const helper = sourceEmitHelpers![i];
             if (predicate(helper)) {
                 helpersRemoved++;
                 targetEmitNode.helpers = appendIfUnique(targetEmitNode.helpers, helper);
             }
             else if (helpersRemoved > 0) {
-                sourceEmitHelpers[i - helpersRemoved] = helper;
+                sourceEmitHelpers![i - helpersRemoved] = helper;
             }
         }
 
         if (helpersRemoved > 0) {
-            sourceEmitHelpers.length -= helpersRemoved;
+            sourceEmitHelpers!.length -= helpersRemoved;
         }
     }
 
@@ -2848,7 +2848,7 @@ namespace ts {
         return node;
     }
 
-    function mergeEmitNode(sourceEmitNode: EmitNode, destEmitNode: EmitNode) {
+    function mergeEmitNode(sourceEmitNode: EmitNode, destEmitNode: EmitNode | undefined) {
         const {
             flags,
             leadingComments,
@@ -2867,14 +2867,14 @@ namespace ts {
         if (flags) destEmitNode.flags = flags;
         if (commentRange) destEmitNode.commentRange = commentRange;
         if (sourceMapRange) destEmitNode.sourceMapRange = sourceMapRange;
-        if (tokenSourceMapRanges) destEmitNode.tokenSourceMapRanges = mergeTokenSourceMapRanges(tokenSourceMapRanges, destEmitNode.tokenSourceMapRanges);
+        if (tokenSourceMapRanges) destEmitNode.tokenSourceMapRanges = mergeTokenSourceMapRanges(tokenSourceMapRanges, destEmitNode.tokenSourceMapRanges!);
         if (constantValue !== undefined) destEmitNode.constantValue = constantValue;
         if (helpers) destEmitNode.helpers = addRange(destEmitNode.helpers, helpers);
         if (startsOnNewLine !== undefined) destEmitNode.startsOnNewLine = startsOnNewLine;
         return destEmitNode;
     }
 
-    function mergeTokenSourceMapRanges(sourceRanges: TextRange[], destRanges: TextRange[]) {
+    function mergeTokenSourceMapRanges(sourceRanges: (TextRange | undefined)[], destRanges: (TextRange | undefined)[]) {
         if (!destRanges) destRanges = [];
         for (const key in sourceRanges) {
             destRanges[key] = sourceRanges[key];
@@ -2926,7 +2926,7 @@ namespace ts {
                     : createElementAccess(target, memberName),
                 memberName
             );
-            getOrCreateEmitNode(expression).flags |= EmitFlags.NoNestedSourceMaps;
+            getOrCreateEmitNode(expression).flags! |= EmitFlags.NoNestedSourceMaps;
             return expression;
         }
     }
@@ -3181,7 +3181,7 @@ namespace ts {
 
     export function createForOfBindingStatement(node: ForInitializer, boundValue: Expression): Statement {
         if (isVariableDeclarationList(node)) {
-            const firstDeclaration = firstOrUndefined(node.declarations);
+            const firstDeclaration = first(node.declarations);
             const updatedDeclaration = updateVariableDeclaration(
                 firstDeclaration,
                 firstDeclaration.name,
@@ -3255,7 +3255,7 @@ namespace ts {
         }
     }
 
-    export function createCallBinding(expression: Expression, recordTempVariable: (temp: Identifier) => void, languageVersion?: ScriptTarget, cacheIdentifiers?: boolean): CallBinding {
+    export function createCallBinding(expression: Expression, recordTempVariable: (temp: Identifier) => void, languageVersion?: ScriptTarget, cacheIdentifiers = false): CallBinding {
         const callee = skipOuterExpressions(expression, OuterExpressionKinds.All);
         let thisArg: Expression;
         let target: LeftHandSideExpression;
@@ -3265,7 +3265,7 @@ namespace ts {
         }
         else if (callee.kind === SyntaxKind.SuperKeyword) {
             thisArg = createThis();
-            target = languageVersion < ScriptTarget.ES2015
+            target = languageVersion! < ScriptTarget.ES2015
                 ? setTextRange(createIdentifier("_super"), callee)
                 : <PrimaryExpression>callee;
         }
@@ -3365,11 +3365,11 @@ namespace ts {
         }
     }
 
-    export function createExpressionForObjectLiteralElementLike(node: ObjectLiteralExpression, property: ObjectLiteralElementLike, receiver: Expression): Expression {
+    export function createExpressionForObjectLiteralElementLike(node: ObjectLiteralExpression, property: ObjectLiteralElementLike, receiver: Expression): Expression | undefined {
         switch (property.kind) {
             case SyntaxKind.GetAccessor:
             case SyntaxKind.SetAccessor:
-                return createExpressionForAccessorDeclaration(node.properties, <AccessorDeclaration>property, receiver, node.multiLine);
+                return createExpressionForAccessorDeclaration(node.properties, <AccessorDeclaration>property, receiver, !!node.multiLine);
             case SyntaxKind.PropertyAssignment:
                 return createExpressionForPropertyAssignment(<PropertyAssignment>property, receiver);
             case SyntaxKind.ShorthandPropertyAssignment:
@@ -3391,7 +3391,7 @@ namespace ts {
                     /*typeParameters*/ undefined,
                     getAccessor.parameters,
                     /*type*/ undefined,
-                    getAccessor.body
+                    getAccessor.body! //fishy
                 );
                 setTextRange(getterFunction, getAccessor);
                 setOriginalNode(getterFunction, getAccessor);
@@ -3407,7 +3407,7 @@ namespace ts {
                     /*typeParameters*/ undefined,
                     setAccessor.parameters,
                     /*type*/ undefined,
-                    setAccessor.body
+                    setAccessor.body! //fishy
                 );
                 setTextRange(setterFunction, setAccessor);
                 setOriginalNode(setterFunction, setAccessor);
@@ -3443,7 +3443,7 @@ namespace ts {
                 setTextRange(
                     createAssignment(
                         createMemberAccessForPropertyName(receiver, property.name, /*location*/ property.name),
-                        property.initializer
+                        property.initializer! //fishy
                     ),
                     property
                 ),
@@ -3482,7 +3482,7 @@ namespace ts {
                                     /*typeParameters*/ undefined,
                                     method.parameters,
                                     /*type*/ undefined,
-                                    method.body
+                                    method.body! //fishy
                                 ),
                                 /*location*/ method
                             ),
@@ -3576,9 +3576,9 @@ namespace ts {
         const nodeName = getNameOfDeclaration(node);
         if (nodeName && isIdentifier(nodeName) && !isGeneratedIdentifier(nodeName)) {
             const name = getMutableClone(nodeName);
-            emitFlags |= getEmitFlags(nodeName);
-            if (!allowSourceMaps) emitFlags |= EmitFlags.NoSourceMap;
-            if (!allowComments) emitFlags |= EmitFlags.NoComments;
+            emitFlags! |= getEmitFlags(nodeName);
+            if (!allowSourceMaps) emitFlags! |= EmitFlags.NoSourceMap;
+            if (!allowComments) emitFlags! |= EmitFlags.NoComments;
             if (emitFlags) setEmitFlags(name, emitFlags);
             return name;
         }
@@ -3615,9 +3615,9 @@ namespace ts {
         const qualifiedName = createPropertyAccess(ns, nodeIsSynthesized(name) ? name : getSynthesizedClone(name));
         setTextRange(qualifiedName, name);
         let emitFlags: EmitFlags;
-        if (!allowSourceMaps) emitFlags |= EmitFlags.NoSourceMap;
-        if (!allowComments) emitFlags |= EmitFlags.NoComments;
-        if (emitFlags) setEmitFlags(qualifiedName, emitFlags);
+        if (!allowSourceMaps) emitFlags! |= EmitFlags.NoSourceMap;
+        if (!allowComments) emitFlags! |= EmitFlags.NoComments;
+        if (emitFlags!) setEmitFlags(qualifiedName, emitFlags!);
         return qualifiedName;
     }
 
@@ -3634,7 +3634,7 @@ namespace ts {
             node.typeParameters,
             node.parameters,
             node.type,
-            node.body
+            node.body! //fishy
         );
         setOriginalNode(updated, node);
         setTextRange(updated, node);
@@ -3785,7 +3785,7 @@ namespace ts {
      * @param isLeftSideOfBinary A value indicating whether the operand is the left side of the
      *                           BinaryExpression.
      */
-    function binaryOperandNeedsParentheses(binaryOperator: SyntaxKind, operand: Expression, isLeftSideOfBinary: boolean, leftOperand: Expression) {
+    function binaryOperandNeedsParentheses(binaryOperator: SyntaxKind, operand: Expression, isLeftSideOfBinary: boolean, leftOperand: Expression | undefined) {
         // If the operand has lower precedence, then it needs to be parenthesized to preserve the
         // intent of the expression. For example, if the operand is `a + b` and the operator is
         // `*`, then we need to parenthesize the operand to preserve the intended order of
@@ -4028,7 +4028,7 @@ namespace ts {
     }
 
     export function parenthesizeListElements(elements: NodeArray<Expression>) {
-        let result: Expression[];
+        let result: Expression[] | undefined;
         for (let i = 0; i < elements.length; i++) {
             const element = parenthesizeExpressionForList(elements[i]);
             if (result !== undefined || element !== elements[i]) {
@@ -4312,7 +4312,7 @@ namespace ts {
     /**
      * Get the name of that target module from an import or export declaration
      */
-    export function getLocalNameForExternalImport(node: ImportDeclaration | ExportDeclaration | ImportEqualsDeclaration, sourceFile: SourceFile): Identifier {
+    export function getLocalNameForExternalImport(node: ImportDeclaration | ExportDeclaration | ImportEqualsDeclaration, sourceFile: SourceFile): Identifier | undefined {
         const namespaceDeclaration = getNamespaceDeclarationNode(node);
         if (namespaceDeclaration && !isDefaultImport(node)) {
             const name = namespaceDeclaration.name;
@@ -4336,7 +4336,7 @@ namespace ts {
      * Otherwise, a new StringLiteral node representing the module name will be returned.
      */
     export function getExternalModuleNameLiteral(importNode: ImportDeclaration | ExportDeclaration | ImportEqualsDeclaration, sourceFile: SourceFile, host: EmitHost, resolver: EmitResolver, compilerOptions: CompilerOptions) {
-        const moduleName = getExternalModuleName(importNode);
+        const moduleName = getExternalModuleName(importNode)!; //fishy
         if (moduleName.kind === SyntaxKind.StringLiteral) {
             return tryGetModuleNameFromDeclaration(importNode, host, resolver, compilerOptions)
                 || tryRenameExternalModule(<StringLiteral>moduleName, sourceFile)
@@ -4362,7 +4362,7 @@ namespace ts {
      *  2. --out or --outFile is used, making the name relative to the rootDir
      * Otherwise, a new StringLiteral node representing the module name will be returned.
      */
-    export function tryGetModuleNameFromFile(file: SourceFile, host: EmitHost, options: CompilerOptions): StringLiteral {
+    export function tryGetModuleNameFromFile(file: SourceFile, host: EmitHost, options: CompilerOptions): StringLiteral | undefined {
         if (!file) {
             return undefined;
         }
@@ -4398,8 +4398,9 @@ namespace ts {
             // `1` in `({ a: b = 1 } = ...)`
             // `1` in `({ a: {b} = 1 } = ...)`
             // `1` in `({ a: [b] = 1 } = ...)`
-            return isAssignmentExpression(bindingElement.initializer, /*excludeCompoundAssignment*/ true)
-                ? bindingElement.initializer.right
+            const initializer = bindingElement.initializer!; //fishy
+            return isAssignmentExpression(initializer, /*excludeCompoundAssignment*/ true)
+                ? initializer.right
                 : undefined;
         }
 
@@ -4424,7 +4425,7 @@ namespace ts {
     /**
      * Gets the name of an BindingOrAssignmentElement.
      */
-    export function getTargetOfBindingOrAssignmentElement(bindingElement: BindingOrAssignmentElement): BindingOrAssignmentElementTarget {
+    export function getTargetOfBindingOrAssignmentElement(bindingElement: BindingOrAssignmentElement): BindingOrAssignmentElementTarget | undefined {
         if (isDeclarationBindingElement(bindingElement)) {
             // `a` in `let { a } = ...`
             // `a` in `let { a = 1 } = ...`
@@ -4499,7 +4500,7 @@ namespace ts {
     /**
      * Determines whether an BindingOrAssignmentElement is a rest element.
      */
-    export function getRestIndicatorOfBindingOrAssignmentElement(bindingElement: BindingOrAssignmentElement): BindingOrAssignmentElementRestIndicator {
+    export function getRestIndicatorOfBindingOrAssignmentElement(bindingElement: BindingOrAssignmentElement): BindingOrAssignmentElementRestIndicator | undefined {
         switch (bindingElement.kind) {
             case SyntaxKind.Parameter:
             case SyntaxKind.BindingElement:
@@ -4526,7 +4527,7 @@ namespace ts {
                 // `"a"` in `let { "a": b } = ...`
                 // `1` in `let { 1: b } = ...`
                 if ((<BindingElement>bindingElement).propertyName) {
-                    const propertyName = (<BindingElement>bindingElement).propertyName;
+                    const propertyName = (<BindingElement>bindingElement).propertyName!; //fishy
                     return isComputedPropertyName(propertyName) && isStringOrNumericLiteral(propertyName.expression)
                         ? propertyName.expression
                         : propertyName;
