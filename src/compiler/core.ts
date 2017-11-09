@@ -292,10 +292,10 @@ namespace ts {
                 return result;
             }
         }
-        Debug.fail();
+        throw Debug.fail();
     }
 
-    export function contains<T>(array: ReadonlyArray<T>, value: T, equalityComparer: EqualityComparer<T> = equateValues): boolean {
+    export function contains<T>(array: ReadonlyArray<T> | undefined, value: T, equalityComparer: EqualityComparer<T> = equateValues): boolean {
         if (array) {
             for (const v of array) {
                 if (equalityComparer(v, value)) {
@@ -784,7 +784,7 @@ namespace ts {
     export function compact<T>(array: T[]): T[];
     export function compact<T>(array: ReadonlyArray<T>): ReadonlyArray<T>;
     export function compact<T>(array: T[]): T[] {
-        let result: T[];
+        let result: T[] | undefined;
         if (array) {
             for (let i = 0; i < array.length; i++) {
                 const v = array[i];
@@ -1072,7 +1072,7 @@ namespace ts {
                     pos++;
                 }
                 else {
-                    result = initial;
+                    result = initial!;
                 }
                 while (pos <= end) {
                     result = f(result, array[pos], pos);
@@ -1357,7 +1357,7 @@ namespace ts {
 
     export function cast<TOut extends TIn, TIn = any>(value: TIn | undefined, test: (value: TIn) => value is TOut): TOut {
         if (value !== undefined && test(value)) return value;
-        Debug.fail(`Invalid cast. The supplied value did not pass the test '${Debug.getFunctionName(test)}'.`);
+        throw Debug.fail(`Invalid cast. The supplied value did not pass the test '${Debug.getFunctionName(test)}'.`);
     }
 
     /** Does nothing. */

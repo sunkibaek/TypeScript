@@ -124,7 +124,8 @@ namespace ts {
         getEnvironmentVariable?(name: string): string;
     };
 
-    export let sys: System | undefined = (() => {
+    // TODO: this is used as if it's certainly defined in many places.
+    export let sys: System = (() => {
         function getNodeSystem(): System {
             const _fs = require("fs");
             const _path = require("path");
@@ -603,7 +604,7 @@ namespace ts {
                 originalWriteFile.call(sys, path, data, writeBom);
             };
         }
-        return sys;
+        return sys!;
     })();
 
     if (sys && sys.getEnvironmentVariable) {

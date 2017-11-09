@@ -2035,7 +2035,9 @@ namespace ts {
         return undefined;
     }
 
-    export function getEscapedTextOfIdentifierOrLiteral(node: Identifier | LiteralLikeNode) {
+    export function getEscapedTextOfIdentifierOrLiteral(node: Identifier | StringLiteral | NumericLiteral): __String;
+    export function getEscapedTextOfIdentifierOrLiteral(node: Identifier | LiteralLikeNode | undefined): __String | undefined;
+    export function getEscapedTextOfIdentifierOrLiteral(node: Identifier | LiteralLikeNode | undefined): __String | undefined {
         if (node) {
             if (node.kind === SyntaxKind.Identifier) {
                 return (node as Identifier).escapedText;
@@ -5232,7 +5234,7 @@ namespace ts {
     // Binding patterns
 
     /* @internal */
-    export function isBindingPattern(node: Node): node is BindingPattern {
+    export function isBindingPattern(node: Node | undefined): node is BindingPattern {
         if (node) {
             const kind = node.kind;
             return kind === SyntaxKind.ArrayBindingPattern
