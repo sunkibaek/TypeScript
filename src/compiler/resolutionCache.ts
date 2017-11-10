@@ -99,7 +99,7 @@ namespace ts {
 
         const directoryWatchesOfFailedLookups = createMap<DirectoryWatchesOfFailedLookup>();
         const rootDir = rootDirForResolution && removeTrailingDirectorySeparator(getNormalizedAbsolutePath(rootDirForResolution, getCurrentDirectory()));
-        const rootPath = rootDir === undefined ? undefined : resolutionHost.toPath(rootDir);
+        const rootPath = rootDir && resolutionHost.toPath(rootDir);
 
         // TypeRoot watches for the types that get added as part of getAutomaticTypeDirectiveNames
         const typeRootsWatches = createMap<FileWatcher>();
