@@ -220,7 +220,7 @@ namespace ts {
         Endfinally = 7,
     }
 
-    function getInstructionName(instruction: Instruction): string {
+    function getInstructionName(instruction: Instruction): string | undefined {
         switch (instruction) {
             case Instruction.Return: return "return";
             case Instruction.Break: return "break";
@@ -295,7 +295,7 @@ namespace ts {
         return transformSourceFile;
 
         function transformSourceFile(node: SourceFile) {
-            if (node.isDeclarationFile || (node.transformFlags & TransformFlags.ContainsGenerator) === 0) {
+            if (node.isDeclarationFile || (node.transformFlags! & TransformFlags.ContainsGenerator) === 0) {
                 return node;
             }
 
@@ -318,10 +318,10 @@ namespace ts {
             else if (inGeneratorFunctionBody) {
                 return visitJavaScriptInGeneratorFunctionBody(node);
             }
-            else if (transformFlags & TransformFlags.Generator) {
+            else if (transformFlags! & TransformFlags.Generator) {
                 return visitGenerator(node);
             }
-            else if (transformFlags & TransformFlags.ContainsGenerator) {
+            else if (transformFlags! & TransformFlags.ContainsGenerator) {
                 return visitEachChild(node, visitor, context);
             }
             else {
@@ -376,10 +376,10 @@ namespace ts {
                 case SyntaxKind.ReturnStatement:
                     return visitReturnStatement(<ReturnStatement>node);
                 default:
-                    if (node.transformFlags & TransformFlags.ContainsYield) {
+                    if (node.transformFlags! & TransformFlags.ContainsYield) {
                         return visitJavaScriptContainingYield(node);
                     }
-                    else if (node.transformFlags & (TransformFlags.ContainsGenerator | TransformFlags.ContainsHoistedDeclarationOrCompletion)) {
+                    else if (node.transformFlags! & (TransformFlags.ContainsGenerator | TransformFlags.ContainsHoistedDeclarationOrCompletion)) {
                         return visitEachChild(node, visitor, context);
                     }
                     else {
@@ -444,7 +444,7 @@ namespace ts {
          *
          * @param node The node to visit.
          */
-        function visitFunctionDeclaration(node: FunctionDeclaration): Statement {
+        function visitFunctionDeclaration(node: FunctionDeclaration): Statement | undefined {
             // Currently, we only support generators that were originally async functions.
             if (node.asteriskToken) {
                 node = setOriginalNode(
@@ -457,7 +457,7 @@ namespace ts {
                             /*typeParameters*/ undefined,
                             visitParameterList(node.parameters, visitor, context),
                             /*type*/ undefined,
-                            transformGeneratorFunctionBody(node.body)
+                            transformGeneratorFunctionBody(node.body!)
                         ),
                         /*location*/ node
                     ),

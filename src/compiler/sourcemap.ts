@@ -56,12 +56,12 @@ namespace ts {
         /**
          * Gets the text for the source map.
          */
-        getText(): string;
+        getText(): string | undefined;
 
         /**
          * Gets the SourceMappingURL for the source map.
          */
-        getSourceMappingURL(): string;
+        getSourceMappingURL(): string | undefined;
 
         /**
          * Gets test data for source maps.
@@ -132,14 +132,14 @@ namespace ts {
                 reset();
             }
 
-            currentSource = undefined;
-            currentSourceText = undefined;
+            currentSource = undefined!;
+            currentSourceText = undefined!;
 
             // Current source map file and its index in the sources list
             sourceMapSourceIndex = -1;
 
             // Last recorded and encoded spans
-            lastRecordedSourceMapSpan = undefined;
+            lastRecordedSourceMapSpan = undefined!;
             lastEncodedSourceMapSpan = defaultLastEncodedSourceMapSpan;
             lastEncodedNameIndex = 0;
 
@@ -177,7 +177,7 @@ namespace ts {
                     sourceMapDir = combinePaths(host.getCommonSourceDirectory(), sourceMapDir);
                     sourceMapData.jsSourceMappingURL = getRelativePathToDirectoryOrUrl(
                         getDirectoryPath(normalizePath(filePath)), // get the relative sourceMapDir path based on jsFilePath
-                        combinePaths(sourceMapDir, sourceMapData.jsSourceMappingURL), // this is where user expects to see sourceMap
+                        combinePaths(sourceMapDir, sourceMapData.jsSourceMappingURL)!, // this is where user expects to see sourceMap
                         host.getCurrentDirectory(),
                         host.getCanonicalFileName,
                         /*isAbsolutePathAnUrl*/ true);
@@ -199,13 +199,13 @@ namespace ts {
                 return;
             }
 
-            currentSource = undefined;
-            sourceMapDir = undefined;
-            sourceMapSourceIndex = undefined;
-            lastRecordedSourceMapSpan = undefined;
-            lastEncodedSourceMapSpan = undefined;
-            lastEncodedNameIndex = undefined;
-            sourceMapData = undefined;
+            currentSource = undefined!;
+            sourceMapDir = undefined!;
+            sourceMapSourceIndex = undefined!;
+            lastRecordedSourceMapSpan = undefined!;
+            lastEncodedSourceMapSpan = undefined!;
+            lastEncodedNameIndex = undefined!;
+            sourceMapData = undefined!;
         }
 
         // Encoding for sourcemap span
@@ -243,10 +243,10 @@ namespace ts {
             sourceMapData.sourceMapMappings += base64VLQFormatEncode(lastRecordedSourceMapSpan.sourceColumn - lastEncodedSourceMapSpan.sourceColumn);
 
             // 5. Relative namePosition 0 based
-            if (lastRecordedSourceMapSpan.nameIndex >= 0) {
+            if (lastRecordedSourceMapSpan.nameIndex! >= 0) {
                 Debug.assert(false, "We do not support name index right now, Make sure to update updateLastEncodedAndRecordedSpans when we start using this");
-                sourceMapData.sourceMapMappings += base64VLQFormatEncode(lastRecordedSourceMapSpan.nameIndex - lastEncodedNameIndex);
-                lastEncodedNameIndex = lastRecordedSourceMapSpan.nameIndex;
+                sourceMapData.sourceMapMappings += base64VLQFormatEncode(lastRecordedSourceMapSpan.nameIndex! - lastEncodedNameIndex);
+                lastEncodedNameIndex = lastRecordedSourceMapSpan.nameIndex!;
             }
 
             lastEncodedSourceMapSpan = lastRecordedSourceMapSpan;
@@ -336,14 +336,14 @@ namespace ts {
                 if (source) setSourceFile(source);
 
                 if (node.kind !== SyntaxKind.NotEmittedStatement
-                    && (emitFlags & EmitFlags.NoLeadingSourceMap) === 0
+                    && (emitFlags! & EmitFlags.NoLeadingSourceMap) === 0
                     && pos >= 0) {
                     emitPos(skipSourceTrivia(pos));
                 }
 
                 if (source) setSourceFile(oldSource);
 
-                if (emitFlags & EmitFlags.NoNestedSourceMaps) {
+                if (emitFlags! & EmitFlags.NoNestedSourceMaps) {
                     disabled = true;
                     emitCallback(hint, node);
                     disabled = false;
@@ -355,7 +355,7 @@ namespace ts {
                 if (source) setSourceFile(source);
 
                 if (node.kind !== SyntaxKind.NotEmittedStatement
-                    && (emitFlags & EmitFlags.NoTrailingSourceMap) === 0
+                    && (emitFlags! & EmitFlags.NoTrailingSourceMap) === 0
                     && end >= 0) {
                     emitPos(end);
                 }
@@ -382,14 +382,14 @@ namespace ts {
             const range = emitNode && emitNode.tokenSourceMapRanges && emitNode.tokenSourceMapRanges[token];
 
             tokenPos = skipSourceTrivia(range ? range.pos : tokenPos);
-            if ((emitFlags & EmitFlags.NoTokenLeadingSourceMaps) === 0 && tokenPos >= 0) {
+            if ((emitFlags! & EmitFlags.NoTokenLeadingSourceMaps) === 0 && tokenPos >= 0) {
                 emitPos(tokenPos);
             }
 
             tokenPos = emitCallback(token, tokenPos);
 
             if (range) tokenPos = range.end;
-            if ((emitFlags & EmitFlags.NoTokenTrailingSourceMaps) === 0 && tokenPos >= 0) {
+            if ((emitFlags! & EmitFlags.NoTokenTrailingSourceMaps) === 0 && tokenPos >= 0) {
                 emitPos(tokenPos);
             }
 
@@ -429,7 +429,7 @@ namespace ts {
                 sourceMapData.inputSourceFileNames.push(currentSource.fileName);
 
                 if (compilerOptions.inlineSources) {
-                    sourceMapData.sourceMapSourcesContent.push(currentSource.text);
+                    sourceMapData.sourceMapSourcesContent!.push(currentSource.text);
                 }
             }
         }
@@ -465,7 +465,7 @@ namespace ts {
 
             if (compilerOptions.inlineSourceMap) {
                 // Encode the sourceMap into the sourceMap url
-                const base64SourceMapText = convertToBase64(getText());
+                const base64SourceMapText = convertToBase64(getText()!);
                 return sourceMapData.jsSourceMappingURL = `data:application/json;base64,${base64SourceMapText}`;
             }
             else {

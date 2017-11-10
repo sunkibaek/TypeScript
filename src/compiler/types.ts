@@ -2443,8 +2443,8 @@ namespace ts {
         // Stores a mapping 'external module reference text' -> 'resolved file name' | undefined
         // It is used to resolve module names in the checker.
         // Content of this field should never be used directly - use getResolvedModuleFileName/setResolvedModuleFileName functions instead
-        /* @internal */ resolvedModules: Map<ResolvedModuleFull>;
-        /* @internal */ resolvedTypeReferenceDirectiveNames: Map<ResolvedTypeReferenceDirective>;
+        /* @internal */ resolvedModules: Map<ResolvedModuleFull | undefined> | undefined;
+        /* @internal */ resolvedTypeReferenceDirectiveNames: Map<ResolvedTypeReferenceDirective | undefined>;
         /* @internal */ imports: ReadonlyArray<StringLiteral>;
         // Identifier only if `declare global`
         /* @internal */ moduleAugmentations: ReadonlyArray<StringLiteral | Identifier>;
@@ -2605,7 +2605,7 @@ namespace ts {
 
     export interface SourceMapData {
         sourceMapFilePath: string;           // Where the sourcemap file is written
-        jsSourceMappingURL: string;          // source map URL written in the .js file
+        jsSourceMappingURL: string | undefined; // source map URL written in the .js file
         sourceMapFile: string;               // Source map's file field - .js file name
         sourceMapSourceRoot: string;         // Source map's sourceRoot field - location where the sources will be present if not ""
         sourceMapSources: string[];          // Source map's sources field - list of sources that can be indexed in this source map
@@ -2634,8 +2634,8 @@ namespace ts {
         emitSkipped: boolean;
         /** Contains declaration emit diagnostics */
         diagnostics: ReadonlyArray<Diagnostic>;
-        emittedFiles: string[]; // Array of files the compiler wrote to disk
-        /* @internal */ sourceMaps: SourceMapData[];  // Array of sourceMapData if compiler emitted sourcemaps
+        emittedFiles: string[] | undefined; // Array of files the compiler wrote to disk
+        /* @internal */ sourceMaps: SourceMapData[] | undefined;  // Array of sourceMapData if compiler emitted sourcemaps
     }
 
     /* @internal */
@@ -2643,7 +2643,7 @@ namespace ts {
         getCompilerOptions(): CompilerOptions;
 
         getSourceFiles(): ReadonlyArray<SourceFile>;
-        getSourceFile(fileName: string): SourceFile;
+        getSourceFile(fileName: string): SourceFile | undefined;
         getResolvedTypeReferenceDirectives(): ReadonlyMap<ResolvedTypeReferenceDirective>;
     }
 

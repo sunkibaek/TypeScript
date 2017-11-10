@@ -47,7 +47,7 @@ namespace ts {
         const commandLine = parseCommandLine(args);
 
         // Configuration file name (if any)
-        let configFileName: string;
+        let configFileName: string | undefined;
         if (commandLine.options.locale) {
             validateLocaleAndSetLanguage(commandLine.options.locale, sys, commandLine.errors);
         }
@@ -71,7 +71,7 @@ namespace ts {
 
         if (commandLine.options.help || commandLine.options.all) {
             printVersion();
-            printHelp(commandLine.options.all);
+            printHelp(!!commandLine.options.all);
             return sys.exit(ExitStatus.Success);
         }
 
@@ -104,7 +104,7 @@ namespace ts {
 
         if (commandLine.fileNames.length === 0 && !configFileName) {
             printVersion();
-            printHelp(commandLine.options.all);
+            printHelp(!!commandLine.options.all);
             return sys.exit(ExitStatus.Success);
         }
 
@@ -295,7 +295,7 @@ namespace ts {
         // Sort our options by their names, (e.g. "--noImplicitAny" comes before "--watch")
         const optsList = showAllOptions ?
             sort(optionDeclarations, (a, b) => compareStringsCaseInsensitive(a.name, b.name)) :
-            filter(optionDeclarations.slice(), v => v.showInSimplifiedHelpView);
+            filter(optionDeclarations.slice(), v => !!v.showInSimplifiedHelpView);
 
         // We want our descriptions to align at the same column in our output,
         // so we keep track of the longest option usage string.

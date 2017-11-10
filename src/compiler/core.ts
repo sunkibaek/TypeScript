@@ -1539,8 +1539,8 @@ namespace ts {
         };
     }
 
-    export function chainDiagnosticMessages(details: DiagnosticMessageChain, message: DiagnosticMessage, ...args: string[]): DiagnosticMessageChain;
-    export function chainDiagnosticMessages(details: DiagnosticMessageChain, message: DiagnosticMessage): DiagnosticMessageChain {
+    export function chainDiagnosticMessages(details: DiagnosticMessageChain | undefined, message: DiagnosticMessage, ...args: string[]): DiagnosticMessageChain;
+    export function chainDiagnosticMessages(details: DiagnosticMessageChain | undefined, message: DiagnosticMessage): DiagnosticMessageChain {
         let text = getLocaleSpecificMessage(message);
 
         if (arguments.length > 2) {
@@ -2108,6 +2108,8 @@ namespace ts {
         return i < 0 ? path : path.substring(i + 1);
     }
 
+    export function combinePaths(path1: string, path2: string): string;
+    export function combinePaths(path1: string | undefined, path2: string | undefined): string | undefined;
     export function combinePaths(path1: string, path2: string): string {
         if (!(path1 && path1.length)) return path2;
         if (!(path2 && path2.length)) return path1;
