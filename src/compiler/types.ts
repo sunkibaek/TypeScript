@@ -709,7 +709,7 @@ namespace ts {
         kind: SignatureDeclaration["kind"];
         name?: PropertyName;
         typeParameters?: NodeArray<TypeParameterDeclaration>;
-        parameters: NodeArray<ParameterDeclaration> | undefined;
+        parameters: NodeArray<ParameterDeclaration>;
         type: TypeNode | undefined;
     }
 
@@ -1538,7 +1538,7 @@ namespace ts {
     export interface PropertyAccessExpression extends MemberExpression, NamedDeclaration {
         kind: SyntaxKind.PropertyAccessExpression;
         expression: LeftHandSideExpression;
-        name: Identifier | undefined;
+        name: Identifier;
     }
 
     export interface SuperPropertyAccessExpression extends PropertyAccessExpression {
@@ -2474,7 +2474,7 @@ namespace ts {
     export interface ParseConfigHost {
         useCaseSensitiveFileNames: boolean;
 
-        readDirectory(rootDir: string, extensions: ReadonlyArray<string>, excludes: ReadonlyArray<string>, includes: ReadonlyArray<string>, depth: number): string[];
+        readDirectory(rootDir: string, extensions: ReadonlyArray<string>, excludes: ReadonlyArray<string> | undefined, includes: ReadonlyArray<string>, depth: number | undefined): string[];
 
         /**
          * Gets a value indicating whether the specified path exists and is a file.
@@ -2975,8 +2975,8 @@ namespace ts {
         writeTypeOfDeclaration(declaration: AccessorDeclaration | VariableLikeDeclaration, enclosingDeclaration: Node, flags: TypeFormatFlags, writer: SymbolWriter): void;
         writeReturnTypeOfSignatureDeclaration(signatureDeclaration: SignatureDeclaration, enclosingDeclaration: Node, flags: TypeFormatFlags, writer: SymbolWriter): void;
         writeTypeOfExpression(expr: Expression, enclosingDeclaration: Node, flags: TypeFormatFlags, writer: SymbolWriter): void;
-        isSymbolAccessible(symbol: Symbol, enclosingDeclaration: Node, meaning: SymbolFlags, shouldComputeAliasToMarkVisible: boolean): SymbolAccessibilityResult;
-        isEntityNameVisible(entityName: EntityNameOrEntityNameExpression, enclosingDeclaration: Node): SymbolVisibilityResult;
+        isSymbolAccessible(symbol: Symbol, enclosingDeclaration: Node | undefined, meaning: SymbolFlags | undefined, shouldComputeAliasToMarkVisible: boolean): SymbolAccessibilityResult;
+        isEntityNameVisible(entityName: EntityNameOrEntityNameExpression, enclosingDeclaration: Node | undefined): SymbolVisibilityResult;
         // Returns the constant value this property access resolves to, or 'undefined' for a non-constant
         getConstantValue(node: EnumMember | PropertyAccessExpression | ElementAccessExpression): string | number;
         getReferencedValueDeclaration(reference: Identifier): Declaration;
@@ -3918,17 +3918,17 @@ namespace ts {
 
     /* @internal */
     export interface ConfigFileSpecs {
-        filesSpecs: ReadonlyArray<string>;
+        filesSpecs: ReadonlyArray<string> | undefined;
         /**
          * Present to report errors (user specified specs), validatedIncludeSpecs are used for file name matching
          */
-        includeSpecs: ReadonlyArray<string>;
+        includeSpecs: ReadonlyArray<string> | undefined;
         /**
          * Present to report errors (user specified specs), validatedExcludeSpecs are used for file name matching
          */
-        excludeSpecs: ReadonlyArray<string>;
-        validatedIncludeSpecs: ReadonlyArray<string>;
-        validatedExcludeSpecs: ReadonlyArray<string>;
+        excludeSpecs: ReadonlyArray<string> | undefined;
+        validatedIncludeSpecs: ReadonlyArray<string> | undefined;
+        validatedExcludeSpecs: ReadonlyArray<string> | undefined;
         wildcardDirectories: MapLike<WatchDirectoryFlags>;
     }
 

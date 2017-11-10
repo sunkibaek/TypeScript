@@ -2676,7 +2676,7 @@ namespace ts {
 
     export function getThisParameter(signature: SignatureDeclaration): ParameterDeclaration | undefined {
         if (signature.parameters.length) {
-            const thisParameter = signature.parameters[0];
+            const thisParameter = signature.parameters![0];
             if (parameterIsThisKeyword(thisParameter)) {
                 return thisParameter;
             }
@@ -2801,11 +2801,11 @@ namespace ts {
         return parameter && getEffectiveTypeAnnotationNode(parameter, checkJSDoc);
     }
 
-    export function emitNewLineBeforeLeadingComments(lineMap: ReadonlyArray<number>, writer: EmitTextWriter, node: TextRange, leadingComments: ReadonlyArray<CommentRange>) {
+    export function emitNewLineBeforeLeadingComments(lineMap: ReadonlyArray<number>, writer: EmitTextWriter, node: TextRange, leadingComments: ReadonlyArray<CommentRange> | undefined) {
         emitNewLineBeforeLeadingCommentsOfPosition(lineMap, writer, node.pos, leadingComments);
     }
 
-    export function emitNewLineBeforeLeadingCommentsOfPosition(lineMap: ReadonlyArray<number>, writer: EmitTextWriter, pos: number, leadingComments: ReadonlyArray<CommentRange>) {
+    export function emitNewLineBeforeLeadingCommentsOfPosition(lineMap: ReadonlyArray<number>, writer: EmitTextWriter, pos: number, leadingComments: ReadonlyArray<CommentRange> | undefined) {
         // If the leading comments start on different line than the start of node, write new line
         if (leadingComments && leadingComments.length && pos !== leadingComments[0].pos &&
             getLineOfLocalPositionFromLineMap(lineMap, pos) !== getLineOfLocalPositionFromLineMap(lineMap, leadingComments[0].pos)) {
@@ -2825,7 +2825,7 @@ namespace ts {
         text: string,
         lineMap: ReadonlyArray<number>,
         writer: EmitTextWriter,
-        comments: ReadonlyArray<CommentRange>,
+        comments: ReadonlyArray<CommentRange> | undefined,
         leadingSeparator: boolean,
         trailingSeparator: boolean,
         newLine: string,

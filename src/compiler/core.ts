@@ -1504,7 +1504,7 @@ namespace ts {
         return text;
     }
 
-    export function createCompilerDiagnostic(message: DiagnosticMessage, ...args: (string | number)[]): Diagnostic;
+    export function createCompilerDiagnostic(message: DiagnosticMessage, ...args: (string | number | undefined)[]): Diagnostic;
     export function createCompilerDiagnostic(message: DiagnosticMessage): Diagnostic {
         let text = getLocaleSpecificMessage(message);
 
