@@ -866,7 +866,7 @@ namespace ts {
     export function createPropertyAccess(expression: Expression, name: string | Identifier | undefined) {
         const node = <PropertyAccessExpression>createSynthesizedNode(SyntaxKind.PropertyAccessExpression);
         node.expression = parenthesizeForAccess(expression);
-        node.name = asName(name);
+        node.name = asName(name)!; //fishy
         setEmitFlags(node, EmitFlags.NoIndentation);
         return node;
     }
@@ -1482,7 +1482,7 @@ namespace ts {
             : node;
     }
 
-    export function createForIn(initializer: ForInitializer, expression: Expression, statement: Statement) {
+    export function createForIn(initializer: ForInitializer | undefined, expression: Expression, statement: Statement) {
         const node = <ForInStatement>createSynthesizedNode(SyntaxKind.ForInStatement);
         node.initializer = initializer;
         node.expression = expression;
@@ -1490,7 +1490,7 @@ namespace ts {
         return node;
     }
 
-    export function updateForIn(node: ForInStatement, initializer: ForInitializer, expression: Expression, statement: Statement) {
+    export function updateForIn(node: ForInStatement, initializer: ForInitializer | undefined, expression: Expression, statement: Statement) {
         return node.initializer !== initializer
             || node.expression !== expression
             || node.statement !== statement
@@ -1498,7 +1498,7 @@ namespace ts {
             : node;
     }
 
-    export function createForOf(awaitModifier: AwaitKeywordToken | undefined, initializer: ForInitializer, expression: Expression, statement: Statement) {
+    export function createForOf(awaitModifier: AwaitKeywordToken | undefined, initializer: ForInitializer | undefined, expression: Expression, statement: Statement) {
         const node = <ForOfStatement>createSynthesizedNode(SyntaxKind.ForOfStatement);
         node.awaitModifier = awaitModifier;
         node.initializer = initializer;
@@ -1507,7 +1507,7 @@ namespace ts {
         return node;
     }
 
-    export function updateForOf(node: ForOfStatement, awaitModifier: AwaitKeywordToken | undefined, initializer: ForInitializer, expression: Expression, statement: Statement) {
+    export function updateForOf(node: ForOfStatement, awaitModifier: AwaitKeywordToken | undefined, initializer: ForInitializer | undefined, expression: Expression, statement: Statement) {
         return node.awaitModifier !== awaitModifier
             || node.initializer !== initializer
             || node.expression !== expression
@@ -1903,12 +1903,12 @@ namespace ts {
         decorators: ReadonlyArray<Decorator> | undefined,
         modifiers: ReadonlyArray<Modifier> | undefined,
         importClause: ImportClause | undefined,
-        moduleSpecifier: Expression): ImportDeclaration {
+        moduleSpecifier?: Expression): ImportDeclaration {
         const node = <ImportDeclaration>createSynthesizedNode(SyntaxKind.ImportDeclaration);
         node.decorators = asNodeArray(decorators);
         node.modifiers = asNodeArray(modifiers);
         node.importClause = importClause;
-        node.moduleSpecifier = moduleSpecifier;
+        node.moduleSpecifier = moduleSpecifier!; //fishy
         return node;
     }
 
@@ -3334,12 +3334,12 @@ namespace ts {
         return { target, thisArg };
     }
 
-    export function inlineExpressions(expressions: Expression[]) {
+    export function inlineExpressions(expressions: Expression[]): Expression {
         // Avoid deeply nested comma expressions as traversing them during emit can result in "Maximum call
         // stack size exceeded" errors.
         return expressions.length > 10
             ? createCommaList(expressions)
-            : reduceLeft(expressions, createComma);
+            : reduceLeft(expressions, createComma)!;
     }
 
     export function createExpressionFromEntityName(node: EntityName | Expression): Expression {

@@ -964,7 +964,7 @@ namespace ts {
             bind(node.expression);
             addAntecedent(postLoopLabel, currentFlow);
             bind(node.initializer);
-            if (node.initializer.kind !== SyntaxKind.VariableDeclarationList) {
+            if (node.initializer!.kind !== SyntaxKind.VariableDeclarationList) {
                 bindAssignmentTargetFlow(<Expression>node.initializer);
             }
             bindIterativeStatement(node.statement, postLoopLabel, preLoopLabel);
@@ -1219,7 +1219,7 @@ namespace ts {
             else if (node.kind === SyntaxKind.ObjectLiteralExpression) {
                 for (const p of (<ObjectLiteralExpression>node).properties) {
                     if (p.kind === SyntaxKind.PropertyAssignment) {
-                        bindDestructuringTargetFlow((<PropertyAssignment>p).initializer);
+                        bindDestructuringTargetFlow((<PropertyAssignment>p).initializer!);
                     }
                     else if (p.kind === SyntaxKind.ShorthandPropertyAssignment) {
                         bindAssignmentTargetFlow((<ShorthandPropertyAssignment>p).name);

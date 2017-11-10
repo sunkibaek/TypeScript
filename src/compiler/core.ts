@@ -861,6 +861,8 @@ namespace ts {
      * @param value The value to append to the array. If `value` is `undefined`, nothing is
      * appended.
      */
+    export function append<T>(to: T[], value: T | undefined): T[];
+    export function append<T>(to: T[] | undefined, value: T | undefined): T[] | undefined;
     export function append<T>(to: T[] | undefined, value: T | undefined): T[] | undefined {
         if (value === undefined) return to;
         if (to === undefined) return [value];
@@ -1011,7 +1013,9 @@ namespace ts {
      */
     export function singleOrMany<T>(array: T[]): T | T[];
     export function singleOrMany<T>(array: ReadonlyArray<T>): T | ReadonlyArray<T>;
-    export function singleOrMany<T>(array: T[]): T | T[] {
+    export function singleOrMany<T>(array: T[] | undefined): T | T[] | undefined;
+    export function singleOrMany<T>(array: ReadonlyArray<T> | undefined): T | ReadonlyArray<T> | undefined;
+    export function singleOrMany<T>(array: ReadonlyArray<T> | undefined): T | ReadonlyArray<T> | undefined {
         return array && array.length === 1
             ? array[0]
             : array;
