@@ -903,7 +903,7 @@ namespace ts {
      *
      * @param node The type node.
      */
-    export function getRestParameterElementType(node: TypeNode) {
+    export function getRestParameterElementType(node: TypeNode | undefined) {
         if (node && node.kind === SyntaxKind.ArrayType) {
             return (<ArrayTypeNode>node).elementType;
         }
