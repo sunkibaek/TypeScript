@@ -181,7 +181,7 @@ namespace ts {
         const updated = visitNode(node, visitor, isConciseBody);
         const declarations = context.endLexicalEnvironment();
         if (some(declarations)) {
-            const block = convertToFunctionBody(updated);
+            const block = convertToFunctionBody(updated!); //fishy
             const statements = mergeLexicalEnvironment(block.statements, declarations);
             return updateBlock(block, statements);
         }
@@ -335,7 +335,7 @@ namespace ts {
                     nodesVisitor((<IndexSignatureDeclaration>node).decorators, visitor, isDecorator),
                     nodesVisitor((<IndexSignatureDeclaration>node).modifiers, visitor, isModifier),
                     nodesVisitor((<IndexSignatureDeclaration>node).parameters, visitor, isParameterDeclaration),
-                    visitNode((<IndexSignatureDeclaration>node).type, visitor, isTypeNode));
+                    visitNode((<IndexSignatureDeclaration>node).type!, visitor, isTypeNode));
 
             // Types
 
@@ -444,7 +444,7 @@ namespace ts {
             case SyntaxKind.ElementAccessExpression:
                 return updateElementAccess(<ElementAccessExpression>node,
                     visitNode((<ElementAccessExpression>node).expression, visitor, isExpression),
-                    visitNode((<ElementAccessExpression>node).argumentExpression, visitor, isExpression));
+                    visitNode((<ElementAccessExpression>node).argumentExpression!, visitor, isExpression));
 
             case SyntaxKind.CallExpression:
                 return updateCall(<CallExpression>node,
@@ -537,7 +537,7 @@ namespace ts {
             case SyntaxKind.YieldExpression:
                 return updateYield(<YieldExpression>node,
                     visitNode((<YieldExpression>node).asteriskToken, tokenVisitor, isToken),
-                    visitNode((<YieldExpression>node).expression, visitor, isExpression));
+                    visitNode((<YieldExpression>node).expression!, visitor, isExpression));
 
             case SyntaxKind.SpreadElement:
                 return updateSpread(<SpreadElement>node,
@@ -656,7 +656,7 @@ namespace ts {
 
             case SyntaxKind.ThrowStatement:
                 return updateThrow(<ThrowStatement>node,
-                    visitNode((<ThrowStatement>node).expression, visitor, isExpression));
+                    visitNode((<ThrowStatement>node).expression!, visitor, isExpression));
 
             case SyntaxKind.TryStatement:
                 return updateTry(<TryStatement>node,
@@ -795,7 +795,7 @@ namespace ts {
 
             case SyntaxKind.ExternalModuleReference:
                 return updateExternalModuleReference(<ExternalModuleReference>node,
-                    visitNode((<ExternalModuleReference>node).expression, visitor, isExpression));
+                    visitNode((<ExternalModuleReference>node).expression!, visitor, isExpression));
 
             // JSX
 
@@ -828,7 +828,7 @@ namespace ts {
             case SyntaxKind.JsxAttribute:
                 return updateJsxAttribute(<JsxAttribute>node,
                     visitNode((<JsxAttribute>node).name, visitor, isIdentifier),
-                    visitNode((<JsxAttribute>node).initializer, visitor, isStringLiteralOrJsxExpression));
+                    visitNode((<JsxAttribute>node).initializer!, visitor, isStringLiteralOrJsxExpression));
 
             case SyntaxKind.JsxAttributes:
                 return updateJsxAttributes(<JsxAttributes>node,
@@ -867,7 +867,7 @@ namespace ts {
             case SyntaxKind.PropertyAssignment:
                 return updatePropertyAssignment(<PropertyAssignment>node,
                     visitNode((<PropertyAssignment>node).name, visitor, isPropertyName),
-                    visitNode((<PropertyAssignment>node).initializer, visitor, isExpression));
+                    visitNode((<PropertyAssignment>node).initializer!, visitor, isExpression));
 
             case SyntaxKind.ShorthandPropertyAssignment:
                 return updateShorthandPropertyAssignment(<ShorthandPropertyAssignment>node,

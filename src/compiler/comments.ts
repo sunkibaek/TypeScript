@@ -5,8 +5,8 @@ namespace ts {
     export interface CommentWriter {
         reset(): void;
         setSourceFile(sourceFile: SourceFile): void;
-        setWriter(writer: EmitTextWriter): void;
-        emitNodeWithComments(hint: EmitHint, node: Node, emitCallback: (hint: EmitHint, node: Node) => void): void;
+        setWriter(writer: EmitTextWriter | undefined): void;
+        emitNodeWithComments(hint: EmitHint, node: Node | undefined, emitCallback: (hint: EmitHint, node: Node) => void): void;
         emitBodyWithDetachedComments(node: Node, detachedRange: TextRange, emitCallback: (node: Node) => void): void;
         emitTrailingCommentsOfPosition(pos: number, prefixSpace?: boolean): void;
         emitLeadingCommentsOfPosition(pos: number): void;

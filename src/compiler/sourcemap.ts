@@ -10,7 +10,7 @@ namespace ts {
          * @param sourceMapFilePath The path to the output source map file.
          * @param sourceFileOrBundle The input source file or bundle for the program.
          */
-        initialize(filePath: string, sourceMapFilePath: string, sourceFileOrBundle: SourceFile | Bundle): void;
+        initialize(filePath: string, sourceMapFilePath: string | undefined, sourceFileOrBundle: SourceFile | Bundle): void;
 
         /**
          * Reset the SourceMapWriter to an empty state.

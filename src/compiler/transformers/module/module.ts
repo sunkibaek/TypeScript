@@ -1088,7 +1088,7 @@ namespace ts {
                         ),
                         /*location*/ node.name
                     ),
-                    visitNode(node.initializer, importCallExpressionVisitor)
+                    visitNode(node.initializer!, importCallExpressionVisitor)
                 );
             }
         }
@@ -1107,7 +1107,7 @@ namespace ts {
             //
             // To balance the declaration, add the exports of the elided variable
             // statement.
-            if (hasAssociatedEndOfDeclarationMarker(node) && node.original.kind === SyntaxKind.VariableStatement) {
+            if (hasAssociatedEndOfDeclarationMarker(node) && node.original!.kind === SyntaxKind.VariableStatement) {
                 const id = getOriginalNodeId(node);
                 deferredExports[id] = appendExportsOfVariableStatement(deferredExports[id], <VariableStatement>node.original);
             }
@@ -1420,9 +1420,9 @@ namespace ts {
 
                 previousOnEmitNode(hint, node, emitCallback);
 
-                currentSourceFile = undefined;
-                currentModuleInfo = undefined;
-                noSubstitution = undefined;
+                currentSourceFile = undefined!;
+                currentModuleInfo = undefined!;
+                noSubstitution = undefined!;
             }
             else {
                 previousOnEmitNode(hint, node, emitCallback);
@@ -1528,7 +1528,7 @@ namespace ts {
                     if (isImportClause(importDeclaration)) {
                         return setTextRange(
                             createPropertyAccess(
-                                getGeneratedNameForNode(importDeclaration.parent),
+                                getGeneratedNameForNode(importDeclaration.parent!),
                                 createIdentifier("default")
                             ),
                             /*location*/ node
@@ -1538,7 +1538,7 @@ namespace ts {
                         const name = importDeclaration.propertyName || importDeclaration.name;
                         return setTextRange(
                             createPropertyAccess(
-                                getGeneratedNameForNode(importDeclaration.parent.parent.parent),
+                                getGeneratedNameForNode(importDeclaration.parent!.parent!.parent!),
                                 getSynthesizedClone(name)
                             ),
                             /*location*/ node

@@ -2705,9 +2705,10 @@ namespace ts {
         getContextualType(node: Expression): Type | undefined;
         /**
          * returns unknownSignature in the case of an error.
+         * returns undefined if the node is not valid.
          * @param argumentCount Apparent number of arguments, passed in case of a possibly incomplete call. This should come from an ArgumentListInfo. See `signatureHelp.ts`.
          */
-        getResolvedSignature(node: CallLikeExpression, candidatesOutArray?: Signature[], argumentCount?: number): Signature;
+        getResolvedSignature(node: CallLikeExpression, candidatesOutArray?: Signature[], argumentCount?: number): Signature | undefined;
         getSignatureFromDeclaration(declaration: SignatureDeclaration): Signature | undefined;
         isImplementationOfOverload(node: FunctionLike): boolean | undefined;
         isUndefinedSymbol(symbol: Symbol): boolean;
@@ -4592,7 +4593,7 @@ namespace ts {
          */
         printBundle(bundle: Bundle): string;
         /*@internal*/ writeNode(hint: EmitHint, node: Node, sourceFile: SourceFile | undefined, writer: EmitTextWriter): void;
-        /*@internal*/ writeFile(sourceFile: SourceFile, writer: EmitTextWriter): void;
+        /*@internal*/ writeFile(sourceFile: SourceFile | undefined, writer: EmitTextWriter): void;
         /*@internal*/ writeBundle(bundle: Bundle, writer: EmitTextWriter): void;
     }
 
@@ -4620,7 +4621,7 @@ namespace ts {
          * });
          * ```
          */
-        onEmitNode?(hint: EmitHint, node: Node, emitCallback: (hint: EmitHint, node: Node) => void): void;
+        onEmitNode?(hint: EmitHint, node: Node | undefined, emitCallback: (hint: EmitHint, node: Node) => void): void;
         /**
          * A hook used by the Printer to perform just-in-time substitution of a node. This is
          * primarily used by node transformations that need to substitute one node for another,
@@ -4638,13 +4639,13 @@ namespace ts {
          * ```
          */
         substituteNode?(hint: EmitHint, node: Node): Node;
-        /*@internal*/ onEmitSourceMapOfNode?: (hint: EmitHint, node: Node, emitCallback: (hint: EmitHint, node: Node) => void) => void;
-        /*@internal*/ onEmitSourceMapOfToken?: (node: Node, token: SyntaxKind, pos: number, emitCallback: (token: SyntaxKind, pos: number) => number) => number;
+        /*@internal*/ onEmitSourceMapOfNode?: (hint: EmitHint, node: Node | undefined, emitCallback: (hint: EmitHint, node: Node) => void) => void;
+        /*@internal*/ onEmitSourceMapOfToken?: (node: Node | undefined, token: SyntaxKind, pos: number, emitCallback: (token: SyntaxKind, pos: number) => number) => number;
         /*@internal*/ onEmitSourceMapOfPosition?: (pos: number) => void;
         /*@internal*/ onEmitHelpers?: (node: Node, writeLines: (text: string) => void) => void;
         /*@internal*/ onSetSourceFile?: (node: SourceFile) => void;
-        /*@internal*/ onBeforeEmitNodeArray?: (nodes: NodeArray<any>) => void;
-        /*@internal*/ onAfterEmitNodeArray?: (nodes: NodeArray<any>) => void;
+        /*@internal*/ onBeforeEmitNodeArray?: (nodes: NodeArray<any> | undefined) => void;
+        /*@internal*/ onAfterEmitNodeArray?: (nodes: NodeArray<any> | undefined) => void;
         /*@internal*/ onBeforeEmitToken?: (node: Node) => void;
         /*@internal*/ onAfterEmitToken?: (node: Node) => void;
     }

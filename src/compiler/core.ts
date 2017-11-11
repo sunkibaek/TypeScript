@@ -401,9 +401,11 @@ namespace ts {
     }
 
     // Maps from T to T and avoids allocation if all elements map to themselves
+    export function sameMap<T>(array: T[], f: (x: T, i: number) => T): T[];
+    export function sameMap<T>(array: ReadonlyArray<T>, f: (x: T, i: number) => T): ReadonlyArray<T>;
     export function sameMap<T>(array: T[] | undefined, f: (x: T, i: number) => T): T[] | undefined;
     export function sameMap<T>(array: ReadonlyArray<T> | undefined, f: (x: T, i: number) => T): ReadonlyArray<T> | undefined;
-    export function sameMap<T>(array: T[] | undefined, f: (x: T, i: number) => T): T[] | undefined {
+    export function sameMap<T>(array: ReadonlyArray<T> | undefined, f: (x: T, i: number) => T): ReadonlyArray<T> | undefined {
         let result: T[] | undefined;
         if (array) {
             for (let i = 0; i < array.length; i++) {
@@ -428,9 +430,9 @@ namespace ts {
      *
      * @param array The array to flatten.
      */
-    export function flatten<T>(array: ReadonlyArray<T | ReadonlyArray<T>>): T[];
-    export function flatten<T>(array: ReadonlyArray<T | ReadonlyArray<T>> | undefined): T[] | undefined;
-    export function flatten<T>(array: ReadonlyArray<T | ReadonlyArray<T>> | undefined): T[] | undefined {
+    export function flatten<T>(array: ReadonlyArray<T | ReadonlyArray<T> | undefined>): T[];
+    export function flatten<T>(array: ReadonlyArray<T | ReadonlyArray<T> | undefined> | undefined): T[] | undefined;
+    export function flatten<T>(array: ReadonlyArray<T | ReadonlyArray<T> | undefined> | undefined): T[] | undefined {
         let result: T[] | undefined;
         if (array) {
             result = [];
@@ -578,6 +580,8 @@ namespace ts {
      * @param keyfn A callback used to select the key for an element.
      * @param mapfn A callback used to map a contiguous chunk of values to a single value.
      */
+    export function spanMap<T, K, U>(array: ReadonlyArray<T>, keyfn: (x: T, i: number) => K, mapfn: (chunk: T[], key: K, start: number, end: number) => U): U[];
+    export function spanMap<T, K, U>(array: ReadonlyArray<T> | undefined, keyfn: (x: T, i: number) => K, mapfn: (chunk: T[], key: K, start: number, end: number) => U): U[] | undefined;
     export function spanMap<T, K, U>(array: ReadonlyArray<T> | undefined, keyfn: (x: T, i: number) => K, mapfn: (chunk: T[], key: K, start: number, end: number) => U): U[] | undefined {
         let result: U[] | undefined;
         if (array) {

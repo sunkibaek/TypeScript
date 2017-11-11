@@ -375,7 +375,7 @@ namespace ts {
                 return node.text;
         }
 
-        Debug.fail(`Literal kind '${node.kind}' not accounted for.`);
+        throw Debug.fail(`Literal kind '${node.kind}' not accounted for.`);
     }
 
     export function getTextOfConstantValue(value: string | number) {
@@ -535,7 +535,7 @@ namespace ts {
 
     // Gets the nearest enclosing block scope container that has the provided node
     // as a descendant, that is not the provided node.
-    export function getEnclosingBlockScopeContainer(node: Node): Node | undefined {
+    export function getEnclosingBlockScopeContainer(node: Node): Node {
         let current = node.parent;
         while (current) {
             if (isBlockScope(current, current.parent!)) {
@@ -544,6 +544,8 @@ namespace ts {
 
             current = current.parent;
         }
+        //SourceFile is a block scope
+        throw Debug.fail();
     }
 
     // Return display name of an identifier
@@ -1358,7 +1360,7 @@ namespace ts {
 
     export function getExternalModuleImportEqualsDeclarationExpression(node: Node) {
         Debug.assert(isExternalModuleImportEqualsDeclaration(node));
-        return (<ExternalModuleReference>(<ImportEqualsDeclaration>node).moduleReference).expression;
+        return (<ExternalModuleReference>(<ImportEqualsDeclaration>node).moduleReference).expression!;
     }
 
     export function isInternalModuleImportEqualsDeclaration(node: Node): node is ImportEqualsDeclaration {
@@ -2597,8 +2599,8 @@ namespace ts {
 
     export interface EmitFileNames {
         jsFilePath: string;
-        sourceMapFilePath: string;
-        declarationFilePath: string;
+        sourceMapFilePath: string | undefined;
+        declarationFilePath: string | undefined;
     }
 
     /**

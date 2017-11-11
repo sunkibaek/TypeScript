@@ -1301,7 +1301,7 @@ namespace ts {
         return <OmittedExpression>createSynthesizedNode(SyntaxKind.OmittedExpression);
     }
 
-    export function createExpressionWithTypeArguments(typeArguments: ReadonlyArray<TypeNode>, expression: Expression) {
+    export function createExpressionWithTypeArguments(typeArguments: ReadonlyArray<TypeNode> | undefined, expression: Expression) {
         const node = <ExpressionWithTypeArguments>createSynthesizedNode(SyntaxKind.ExpressionWithTypeArguments);
         node.expression = parenthesizeForAccess(expression);
         node.typeArguments = asNodeArray(typeArguments);
@@ -3701,9 +3701,11 @@ namespace ts {
      * This function needs to be called whenever we transform the statement
      * list of a source file, namespace, or function-like body.
      */
-    export function addCustomPrologue(target: Statement[], source: ReadonlyArray<Statement>, statementOffset: number, visitor?: (node: Node) => VisitResult<Node>): number {
+    export function addCustomPrologue(target: Statement[], source: ReadonlyArray<Statement>, statementOffset: number, visitor?: (node: Node) => VisitResult<Node>): number;
+    export function addCustomPrologue(target: Statement[], source: ReadonlyArray<Statement>, statementOffset: number | undefined, visitor?: (node: Node) => VisitResult<Node>): number | undefined;
+    export function addCustomPrologue(target: Statement[], source: ReadonlyArray<Statement>, statementOffset: number | undefined, visitor?: (node: Node) => VisitResult<Node>): number | undefined {
         const numStatements = source.length;
-        while (statementOffset < numStatements) {
+        while (statementOffset !== undefined && statementOffset < numStatements) {
             const statement = source[statementOffset];
             if (getEmitFlags(statement) & EmitFlags.CustomPrologue) {
                 target.push(visitor ? visitNode(statement, visitor, isStatement) : statement);
