@@ -267,14 +267,14 @@ namespace ts {
         return false;
     }
 
-    /* @internal */ export function isUnicodeIdentifierStart(code: number, languageVersion: ScriptTarget) {
-        return languageVersion >= ScriptTarget.ES5 ?
+    /* @internal */ export function isUnicodeIdentifierStart(code: number, languageVersion: ScriptTarget | undefined) {
+        return languageVersion! >= ScriptTarget.ES5 ?
             lookupInUnicodeMap(code, unicodeES5IdentifierStart) :
             lookupInUnicodeMap(code, unicodeES3IdentifierStart);
     }
 
-    function isUnicodeIdentifierPart(code: number, languageVersion: ScriptTarget) {
-        return languageVersion >= ScriptTarget.ES5 ?
+    function isUnicodeIdentifierPart(code: number, languageVersion: ScriptTarget | undefined) {
+        return languageVersion! >= ScriptTarget.ES5 ?
             lookupInUnicodeMap(code, unicodeES5IdentifierPart) :
             lookupInUnicodeMap(code, unicodeES3IdentifierPart);
     }
@@ -765,20 +765,20 @@ namespace ts {
         }
     }
 
-    export function isIdentifierStart(ch: number, languageVersion: ScriptTarget): boolean {
+    export function isIdentifierStart(ch: number, languageVersion: ScriptTarget | undefined): boolean {
         return ch >= CharacterCodes.A && ch <= CharacterCodes.Z || ch >= CharacterCodes.a && ch <= CharacterCodes.z ||
             ch === CharacterCodes.$ || ch === CharacterCodes._ ||
             ch > CharacterCodes.maxAsciiCharacter && isUnicodeIdentifierStart(ch, languageVersion);
     }
 
-    export function isIdentifierPart(ch: number, languageVersion: ScriptTarget): boolean {
+    export function isIdentifierPart(ch: number, languageVersion: ScriptTarget | undefined): boolean {
         return ch >= CharacterCodes.A && ch <= CharacterCodes.Z || ch >= CharacterCodes.a && ch <= CharacterCodes.z ||
             ch >= CharacterCodes._0 && ch <= CharacterCodes._9 || ch === CharacterCodes.$ || ch === CharacterCodes._ ||
             ch > CharacterCodes.maxAsciiCharacter && isUnicodeIdentifierPart(ch, languageVersion);
     }
 
     /* @internal */
-    export function isIdentifierText(name: string, languageVersion: ScriptTarget): boolean {
+    export function isIdentifierText(name: string, languageVersion: ScriptTarget | undefined): boolean {
         if (!isIdentifierStart(name.charCodeAt(0), languageVersion)) {
             return false;
         }

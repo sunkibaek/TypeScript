@@ -36,7 +36,7 @@ namespace ts {
         return declarationDiagnostics.getDiagnostics(targetSourceFile ? targetSourceFile.fileName : undefined);
 
         function getDeclarationDiagnosticsFromFile({ declarationFilePath }: EmitFileNames, sourceFileOrBundle: SourceFile | Bundle) {
-            emitDeclarations(host, resolver, declarationDiagnostics, declarationFilePath, sourceFileOrBundle, /*emitOnlyDtsFiles*/ false);
+            emitDeclarations(host, resolver, declarationDiagnostics, declarationFilePath!, sourceFileOrBundle, /*emitOnlyDtsFiles*/ false); //fishy
         }
     }
 

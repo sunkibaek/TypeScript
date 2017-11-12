@@ -2315,7 +2315,7 @@ namespace ts {
             if (!(flags & SignatureFlags.JSDoc)) {
                 signature.typeParameters = parseTypeParameters();
             }
-            signature.parameters = parseParameterList(flags);
+            signature.parameters = parseParameterList(flags)!; //fishy
             signature.type = parseReturnType(returnToken, !!(flags & SignatureFlags.Type));
         }
 
@@ -6715,7 +6715,7 @@ namespace ts {
                     while (parseOptional(SyntaxKind.DotToken)) {
                         const prop: PropertyAccessEntityNameExpression = createNode(SyntaxKind.PropertyAccessExpression, node.pos) as PropertyAccessEntityNameExpression;
                         prop.expression = node;
-                        prop.name = parseJSDocIdentifierName();
+                        prop.name = parseJSDocIdentifierName()!; //fishy
                         node = finishNode(prop);
                     }
                     return node;

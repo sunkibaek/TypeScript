@@ -7,7 +7,7 @@ namespace ts {
         resolveStructuredTypeMembers: (type: ObjectType) => ResolvedType,
         getTypeOfSymbol: (sym: Symbol) => Type,
         getResolvedSymbol: (node: Node) => Symbol,
-        getIndexTypeOfStructuredType: (type: Type, kind: IndexKind) => Type,
+        getIndexTypeOfStructuredType: (type: Type, kind: IndexKind) => Type | undefined,
         getConstraintFromTypeParameter: (typeParameter: TypeParameter) => Type,
         getFirstIdentifier: (node: EntityNameOrEntityNameExpression) => Identifier) {
 

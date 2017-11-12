@@ -2721,7 +2721,7 @@ namespace ts {
         /** Follow all aliases to get the original symbol. */
         getAliasedSymbol(symbol: Symbol): Symbol;
         /** Follow a *single* alias to get the immediately aliased symbol. */
-        /* @internal */ getImmediateAliasedSymbol(symbol: Symbol): Symbol;
+        /* @internal */ getImmediateAliasedSymbol(symbol: Symbol): Symbol | undefined;
         getExportsOfModule(moduleSymbol: Symbol): Symbol[];
         /** Unlike `getExportsOfModule`, this includes properties of an `export =` value. */
         /* @internal */ getExportsAndPropertiesOfModule(moduleSymbol: Symbol): Symbol[];
@@ -3380,25 +3380,25 @@ namespace ts {
 
     /** Class and interface types (ObjectFlags.Class and ObjectFlags.Interface). */
     export interface InterfaceType extends ObjectType {
-        typeParameters: TypeParameter[];           // Type parameters (undefined if non-generic)
-        outerTypeParameters: TypeParameter[];      // Outer type parameters (undefined if none)
-        localTypeParameters: TypeParameter[];      // Local type parameters (undefined if none)
-        thisType: TypeParameter;                   // The "this" type (undefined if none)
+        typeParameters: TypeParameter[] | undefined;      // Type parameters (undefined if non-generic)
+        outerTypeParameters: TypeParameter[] | undefined; // Outer type parameters (undefined if none)
+        localTypeParameters: TypeParameter[] | undefined; // Local type parameters (undefined if none)
+        thisType: TypeParameter |  undefined;             // The "this" type (undefined if none)
         /* @internal */
-        resolvedBaseConstructorType?: Type;        // Resolved base constructor type of class
+        resolvedBaseConstructorType?: Type;               // Resolved base constructor type of class
         /* @internal */
-        resolvedBaseTypes: BaseType[];             // Resolved base types
+        resolvedBaseTypes: BaseType[];                    // Resolved base types
     }
 
     // Object type or intersection of object types
     export type BaseType = ObjectType | IntersectionType;
 
     export interface InterfaceTypeWithDeclaredMembers extends InterfaceType {
-        declaredProperties: Symbol[];              // Declared members
-        declaredCallSignatures: Signature[];       // Declared call signatures
-        declaredConstructSignatures: Signature[];  // Declared construct signatures
-        declaredStringIndexInfo: IndexInfo;        // Declared string indexing info
-        declaredNumberIndexInfo: IndexInfo;        // Declared numeric indexing info
+        declaredProperties: Symbol[];                   // Declared members
+        declaredCallSignatures: Signature[];            // Declared call signatures
+        declaredConstructSignatures: Signature[];       // Declared construct signatures
+        declaredStringIndexInfo: IndexInfo | undefined; // Declared string indexing info
+        declaredNumberIndexInfo: IndexInfo | undefined; // Declared numeric indexing info
     }
 
     /**
@@ -3480,12 +3480,12 @@ namespace ts {
     /* @internal */
     // Resolved object, union, or intersection type
     export interface ResolvedType extends ObjectType, UnionOrIntersectionType {
-        members: SymbolTable;              // Properties by name
-        properties: Symbol[];              // Properties
-        callSignatures: Signature[];       // Call signatures of type
-        constructSignatures: Signature[];  // Construct signatures of type
-        stringIndexInfo?: IndexInfo;       // String indexing info
-        numberIndexInfo?: IndexInfo;       // Numeric indexing info
+        members: SymbolTable;             // Properties by name
+        properties: Symbol[];             // Properties
+        callSignatures: Signature[];      // Call signatures of type
+        constructSignatures: Signature[]; // Construct signatures of type
+        stringIndexInfo?: IndexInfo;      // String indexing info
+        numberIndexInfo?: IndexInfo;      // Numeric indexing info
     }
 
     /* @internal */
@@ -3564,7 +3564,7 @@ namespace ts {
         /* @internal */
         thisParameter?: Symbol;             // symbol of this-type parameter
         /* @internal */
-        resolvedReturnType: Type;           // Resolved return type
+        resolvedReturnType: Type | undefined; // Resolved return type
         /* @internal */
         minArgumentCount: number;           // Number of non-optional parameters
         /* @internal */
@@ -3612,11 +3612,11 @@ namespace ts {
 
     export interface InferenceInfo {
         typeParameter: TypeParameter;
-        candidates: Type[];
-        inferredType: Type;
-        priority: InferencePriority;
-        topLevel: boolean;
-        isFixed: boolean;
+        candidates: Type[] | undefined;
+        inferredType: Type | undefined;
+        priority: InferencePriority | undefined;
+        topLevel: boolean | undefined;
+        isFixed: boolean | undefined;
     }
 
     export const enum InferenceFlags {

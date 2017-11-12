@@ -656,7 +656,7 @@ namespace ts {
             : node;
     }
 
-    export function createTypeLiteralNode(members: ReadonlyArray<TypeElement>) {
+    export function createTypeLiteralNode(members: ReadonlyArray<TypeElement> | undefined) {
         const node = createSynthesizedNode(SyntaxKind.TypeLiteral) as TypeLiteralNode;
         node.members = createNodeArray(members);
         return node;
